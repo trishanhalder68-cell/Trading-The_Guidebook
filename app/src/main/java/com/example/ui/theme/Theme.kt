@@ -63,14 +63,12 @@ private val CitadelDarkColorScheme = darkColorScheme(
     outlineVariant = SlateDark
 )
 
-import android.content.Context
-import android.content.ContextWrapper
-
 private tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
 }
+
 
 @Composable
 fun MyApplicationTheme(
