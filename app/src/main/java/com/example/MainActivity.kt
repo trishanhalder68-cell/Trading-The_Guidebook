@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,13 +26,12 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.InsertChart
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.FloatingActionButton
@@ -54,9 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,15 +68,18 @@ import com.example.ui.screens.GlossaryScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.MarketRadarScreen
 import com.example.ui.screens.MasterclassScreen
-import com.example.ui.theme.GoldBorder
-import com.example.ui.theme.GoldGleam
-import com.example.ui.theme.ImperialGold
+import com.example.ui.screens.SimulatedExecutionScreen
+import com.example.ui.theme.BrushedGold
+import com.example.ui.theme.CreamBackground
+import com.example.ui.theme.CreamBorder
+import com.example.ui.theme.CreamContainer
+import com.example.ui.theme.CreamSurface
 import com.example.ui.theme.MyApplicationTheme
-import com.example.ui.theme.ObsidianBlack
-import com.example.ui.theme.ObsidianCardElevated
-import com.example.ui.theme.TextPrimary
-import com.example.ui.theme.TextSecondary
-import com.example.ui.theme.TextTertiary
+import com.example.ui.theme.SlateCharcoal
+import com.example.ui.theme.SlateMuted
+import com.example.ui.theme.SlateSubtle
+import com.example.ui.theme.TrustBlue
+import com.example.ui.theme.TrustBlueContainer
 import com.example.viewmodel.WealthViewModel
 
 class MainActivity : ComponentActivity() {
@@ -101,10 +102,10 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class NavigationTab(val label: String, val icon: ImageVector) {
-    HOME("Home", Icons.Default.AccountBalanceWallet),
-    ANALYTICS("Analytics", Icons.Default.InsertChart),
-    RADAR("Radar", Icons.Default.Public),
-    GUIDEBOOK("Guidebook", Icons.Default.MenuBook),
+    HOME("The Path", Icons.Default.AccountBalanceWallet),
+    MASTERCLASS("Basics", Icons.AutoMirrored.Filled.MenuBook),
+    ANALYTICS("Analysis", Icons.Default.InsertChart),
+    SIMULATION("Execution", Icons.Default.AutoGraph),
     MENTOR("AI Mentor", Icons.Default.SmartToy)
 }
 
@@ -112,6 +113,7 @@ enum class NavigationTab(val label: String, val icon: ImageVector) {
 fun MainAppScreen(viewModel: WealthViewModel) {
     var selectedTab by remember { mutableIntStateOf(0) }
     var guidebookSubTab by remember { mutableIntStateOf(0) } // 0: Masterclass, 1: Glossary Dictionary
+    var analyticsSubTab by remember { mutableIntStateOf(0) } // 0: Charts & Multiplier, 1: Macro Radar
 
     var showAddTransactionSheet by remember { mutableStateOf(false) }
     var showCheckoutModal by remember { mutableStateOf(false) }
@@ -128,15 +130,15 @@ fun MainAppScreen(viewModel: WealthViewModel) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = ObsidianBlack,
+        containerColor = CreamBackground,
         bottomBar = {
             NavigationBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .windowInsetsPadding(WindowInsets.navigationBars)
-                    .border(1.dp, GoldBorder.copy(alpha = 0.5f)),
-                containerColor = ObsidianBlack,
-                tonalElevation = 8.dp
+                    .border(BorderStroke(1.dp, CreamBorder)),
+                containerColor = CreamSurface,
+                tonalElevation = 6.dp
             ) {
                 NavigationTab.entries.forEachIndexed { index, tab ->
                     val isSelected = selectedTab == index
@@ -158,11 +160,11 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = ObsidianBlack,
-                            selectedTextColor = ImperialGold,
-                            unselectedIconColor = TextTertiary,
-                            unselectedTextColor = TextTertiary,
-                            indicatorColor = ImperialGold
+                            selectedIconColor = TrustBlue,
+                            selectedTextColor = TrustBlue,
+                            unselectedIconColor = SlateSubtle,
+                            unselectedTextColor = SlateMuted,
+                            indicatorColor = TrustBlueContainer
                         ),
                         modifier = Modifier.testTag("nav_tab_${tab.name.lowercase()}")
                     )
@@ -173,8 +175,8 @@ fun MainAppScreen(viewModel: WealthViewModel) {
             if (selectedTab == 0) {
                 FloatingActionButton(
                     onClick = { showAddTransactionSheet = true },
-                    containerColor = ImperialGold,
-                    contentColor = ObsidianBlack,
+                    containerColor = TrustBlue,
+                    contentColor = Color.White,
                     shape = CircleShape,
                     modifier = Modifier
                         .size(56.dp)
@@ -197,55 +199,52 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                         onOpenAddTransaction = { showAddTransactionSheet = true },
                         onOpenCheckout = { showCheckoutModal = true },
                         onOpenQuoteDialog = { showQuoteDialog = true },
-                        onNavigateToAnalytics = { selectedTab = 1 },
-                        onNavigateToAiMentor = { selectedTab = 4 },
-                        onInitiateMasterclass = {
-                            selectedTab = 3
-                            guidebookSubTab = 0
+                        onNavigateToStage = { target ->
+                            when (target) {
+                                "home" -> selectedTab = 0
+                                "masterclass" -> selectedTab = 1
+                                "analytics" -> selectedTab = 2
+                                "simulation" -> selectedTab = 3
+                                "mentor" -> selectedTab = 4
+                                else -> selectedTab = 0
+                            }
                         }
                     )
                 }
-                NavigationTab.ANALYTICS -> {
-                    AnalyticsScreen(viewModel = viewModel)
-                }
-                NavigationTab.RADAR -> {
-                    MarketRadarScreen(viewModel = viewModel)
-                }
-                NavigationTab.GUIDEBOOK -> {
-                    // Unified Guidebook Screen with Sub-Tab Selector
+                NavigationTab.MASTERCLASS -> {
+                    // Stage 2: Market Basics & Glossary
                     Column(modifier = Modifier.fillMaxSize()) {
-                        // Kang's Citadel Sub-Nav Header
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 18.dp, vertical = 10.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(ObsidianCardElevated)
-                                .border(1.dp, GoldBorder.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(CreamContainer)
+                                .border(BorderStroke(1.dp, CreamBorder), RoundedCornerShape(12.dp))
                                 .padding(4.dp)
                         ) {
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(if (guidebookSubTab == 0) ImperialGold else Color.Transparent)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (guidebookSubTab == 0) TrustBlue else Color.Transparent)
                                     .clickable { guidebookSubTab = 0 }
-                                    .padding(vertical = 10.dp),
+                                    .padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.School,
                                         contentDescription = null,
-                                        tint = if (guidebookSubTab == 0) ObsidianBlack else ImperialGold,
+                                        tint = if (guidebookSubTab == 0) Color.White else SlateCharcoal,
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "Masterclass (1602–Now)",
+                                        text = "Stage 2: Masterclass",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (guidebookSubTab == 0) ObsidianBlack else TextPrimary
+                                        color = if (guidebookSubTab == 0) Color.White else SlateCharcoal
                                     )
                                 }
                             }
@@ -253,17 +252,17 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(if (guidebookSubTab == 1) ImperialGold else Color.Transparent)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (guidebookSubTab == 1) TrustBlue else Color.Transparent)
                                     .clickable { guidebookSubTab = 1 }
-                                    .padding(vertical = 10.dp),
+                                    .padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.Book,
                                         contentDescription = null,
-                                        tint = if (guidebookSubTab == 1) ObsidianBlack else ImperialGold,
+                                        tint = if (guidebookSubTab == 1) Color.White else SlateCharcoal,
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
@@ -271,7 +270,7 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                                         text = "Benevolent Glossary",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (guidebookSubTab == 1) ObsidianBlack else TextPrimary
+                                        color = if (guidebookSubTab == 1) Color.White else SlateCharcoal
                                     )
                                 }
                             }
@@ -290,6 +289,72 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                             GlossaryScreen(viewModel = viewModel)
                         }
                     }
+                }
+                NavigationTab.ANALYTICS -> {
+                    // Stage 3: Analysis & Charts + Macro Radar
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(CreamContainer)
+                                .border(BorderStroke(1.dp, CreamBorder), RoundedCornerShape(12.dp))
+                                .padding(4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (analyticsSubTab == 0) TrustBlue else Color.Transparent)
+                                    .clickable { analyticsSubTab = 0 }
+                                    .padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Stage 3: Wealth Multiplier",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (analyticsSubTab == 0) Color.White else SlateCharcoal
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (analyticsSubTab == 1) TrustBlue else Color.Transparent)
+                                    .clickable { analyticsSubTab = 1 }
+                                    .padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Regional Macro Radar",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (analyticsSubTab == 1) Color.White else SlateCharcoal
+                                )
+                            }
+                        }
+
+                        if (analyticsSubTab == 0) {
+                            AnalyticsScreen(viewModel = viewModel)
+                        } else {
+                            MarketRadarScreen(viewModel = viewModel)
+                        }
+                    }
+                }
+                NavigationTab.SIMULATION -> {
+                    // Stage 4: Simulated Execution
+                    SimulatedExecutionScreen(
+                        onConsultAiMentor = { prompt ->
+                            selectedTab = 4
+                            viewModel.sendChatMessage(prompt)
+                        },
+                        onCompleteStage4 = {
+                            viewModel.completeStage(4)
+                        }
+                    )
                 }
                 NavigationTab.MENTOR -> {
                     AiMentorScreen(viewModel = viewModel)

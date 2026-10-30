@@ -76,7 +76,7 @@ fun AnalyticsScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(ObsidianBlack)
+            .background(com.example.ui.theme.CreamBackground)
             .padding(horizontal = 18.dp)
     ) {
         item {

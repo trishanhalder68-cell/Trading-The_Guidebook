@@ -1,0 +1,107 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with sovereign trader status, target metrics, and unlocked masterclass levels.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The authenticated user UID."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name."
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address."
+        },
+        "isVip": {
+          "type": "boolean",
+          "description": "Whether sovereign VIP status is active."
+        },
+        "monthlyTarget": {
+          "type": "number",
+          "description": "Monthly savings target amount."
+        },
+        "annualTarget": {
+          "type": "number",
+          "description": "Annual savings target amount."
+        },
+        "unlockedLevels": {
+          "type": "array",
+          "description": "List of unlocked masterclass level IDs."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Document creation timestamp. Must be server timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Document update timestamp. Must be server timestamp."
+        }
+      },
+      "required": ["userId", "displayName", "isVip", "createdAt", "updatedAt"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Daily ledger record of income or expense.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique transaction ID."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title or description of the transaction."
+        },
+        "amount": {
+          "type": "number",
+          "description": "Monetary value."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["INCOME", "EXPENSE"],
+          "description": "Cashflow direction."
+        },
+        "category": {
+          "type": "string",
+          "description": "Category name."
+        },
+        "date": {
+          "type": "string",
+          "description": "Transaction date formatted as string or ISO date."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Document creation timestamp. Must be server timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Document update timestamp. Must be server timestamp."
+        }
+      },
+      "required": ["userId", "title", "amount", "type", "category", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile, trading rank, targets and sovereign status."
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "User's daily transactions and cashflow records."
+    }
+  }
+}

@@ -17,6 +17,11 @@ import com.example.data.model.MotivationalQuote
 import com.example.data.model.RecurrencePeriod
 import com.example.data.model.RegionCriteria
 import com.example.data.model.RegionRepository
+import com.example.data.model.FirestoreTransaction
+import com.example.data.model.FirestoreUserProfile
+import com.example.data.repository.FirestoreRepository
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.example.data.model.TransactionEntity
 import com.example.data.model.TransactionType
 import com.example.ui.components.CategorySlice
@@ -50,6 +55,43 @@ class WealthViewModel(application: Application) : AndroidViewModel(application) 
     private val dao = database.transactionDao()
     private val prefs = UserPreferences(application)
     private val aiService = GeminiAdvisorService()
+    val firestoreRepository = FirestoreRepository(application)
+
+    // The Trader's Path 4-Stage Sequential Roadmap State
+    private val _activeStage = MutableStateFlow(prefs.activeStage)
+    val activeStage: StateFlow<Int> = _activeStage.asStateFlow()
+
+    private val _completedStages = MutableStateFlow(prefs.completedStages)
+    val completedStages: StateFlow<Set<Int>> = _completedStages.asStateFlow()
+
+    fun selectRoadmapStage(stage: Int) {
+        prefs.activeStage = stage
+        _activeStage.value = stage
+    }
+
+    fun completeStage(stage: Int) {
+        prefs.markStageCompleted(stage)
+        _completedStages.value = prefs.completedStages
+        if (stage < 4 && prefs.activeStage <= stage) {
+            prefs.activeStage = stage + 1
+            _activeStage.value = stage + 1
+        }
+        // If user is authenticated, sync profile to Firestore
+        val user = Firebase.auth.currentUser
+        if (user != null) {
+            viewModelScope.launch {
+                firestoreRepository.saveUserProfile(
+                    FirestoreUserProfile(
+                        userId = user.uid,
+                        displayName = user.displayName ?: "Trader",
+                        email = user.email,
+                        isVip = prefs.isVipPro,
+                        unlockedLevels = _completedStages.value.toList()
+                    )
+                )
+            }
+        }
+    }
 
     // Active Region State
     private val _currentRegion = MutableStateFlow(RegionRepository.getRegionByCode(prefs.selectedRegionCode))
@@ -153,6 +195,20 @@ class WealthViewModel(application: Application) : AndroidViewModel(application) 
     fun addTransaction(tx: TransactionEntity) {
         viewModelScope.launch {
             dao.insertTransaction(tx)
+            completeStage(1) // Completes Stage 1: Money Foundations & Income Tracker!
+            val user = Firebase.auth.currentUser
+            if (user != null) {
+                firestoreRepository.addTransaction(
+                    userId = user.uid,
+                    transaction = FirestoreTransaction(
+                        title = tx.title,
+                        amount = tx.amount,
+                        type = tx.type.name,
+                        category = tx.category,
+                        date = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date(tx.timestamp))
+                    )
+                )
+            }
         }
     }
 

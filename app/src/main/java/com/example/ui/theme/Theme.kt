@@ -4,47 +4,76 @@ import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = ImperialGold,
+// Clean, minimalist, human-friendly light color scheme
+private val FriendlyColorScheme = lightColorScheme(
+    primary = TrustBlue,
+    onPrimary = CreamSurface,
+    primaryContainer = TrustBlueContainer,
+    onPrimaryContainer = TrustBlue,
+    secondary = SageGreen,
+    onSecondary = CreamSurface,
+    secondaryContainer = SageGreenContainer,
+    onSecondaryContainer = SageGreenText,
+    tertiary = BrushedGold,
+    onTertiary = ObsidianBlack,
+    tertiaryContainer = CreamContainer,
+    onTertiaryContainer = SlateCharcoal,
+    background = CreamBackground,
+    onBackground = SlateCharcoal,
+    surface = CreamSurface,
+    onSurface = SlateCharcoal,
+    surfaceVariant = CreamContainer,
+    onSurfaceVariant = SlateMuted,
+    outline = CreamBorder,
+    outlineVariant = SlateBorder,
+    error = CrimsonLoss,
+    onError = CreamSurface,
+    errorContainer = CrimsonContainer,
+    onErrorContainer = CrimsonLossDark
+)
+
+private val CitadelDarkColorScheme = darkColorScheme(
+    primary = BrushedGold,
     onPrimary = ObsidianBlack,
     primaryContainer = GoldDark,
     onPrimaryContainer = GoldGleam,
-    secondary = GoldMuted,
+    secondary = SageGreenAccent,
     onSecondary = ObsidianBlack,
-    secondaryContainer = ObsidianCardElevated,
-    onSecondaryContainer = GoldGleam,
-    tertiary = EmeraldProfit,
-    onTertiary = ObsidianBlack,
+    secondaryContainer = CitadelCardElevated,
+    onSecondaryContainer = SageGreenContainer,
+    tertiary = TrustBlueHover,
+    onTertiary = CreamSurface,
     background = ObsidianBlack,
-    onBackground = TextPrimary,
-    surface = ObsidianSurface,
-    onSurface = TextPrimary,
-    surfaceVariant = ObsidianCard,
-    onSurfaceVariant = TextSecondary,
-    outline = GoldBorder,
-    outlineVariant = OutlineDark
+    onBackground = CreamSurface,
+    surface = CitadelSurface,
+    onSurface = CreamSurface,
+    surfaceVariant = CitadelCard,
+    onSurfaceVariant = SlateSubtle,
+    outline = BrushedGold,
+    outlineVariant = SlateDark
 )
 
 @Composable
 fun MyApplicationTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false, // Default to the warm off-white & cream design requested
     content: @Composable () -> Unit
 ) {
-    val colorScheme = DarkColorScheme
+    val colorScheme = if (darkTheme) CitadelDarkColorScheme else FriendlyColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = ObsidianBlack.toArgb()
-            window.navigationBarColor = ObsidianBlack.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
+            window.statusBarColor = colorScheme.background.toArgb()
+            window.navigationBarColor = colorScheme.background.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
         }
     }
 

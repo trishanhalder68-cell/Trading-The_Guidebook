@@ -91,7 +91,7 @@ fun MasterclassScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(ObsidianBlack)
+            .background(com.example.ui.theme.CreamBackground)
     ) {
         // Kang's Citadel Black & Gold Marble Texture
         Image(

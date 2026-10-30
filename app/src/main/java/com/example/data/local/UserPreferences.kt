@@ -13,6 +13,8 @@ class UserPreferences(context: Context) {
         private const val KEY_LAST_QUOTE_DAY = "last_quote_day"
         private const val KEY_SAVINGS_TARGET = "savings_target_percent"
         private const val KEY_UNLOCKED_CHAPTERS = "unlocked_chapter_ids"
+        private const val KEY_COMPLETED_STAGES = "completed_roadmap_stages"
+        private const val KEY_ACTIVE_STAGE = "active_roadmap_stage"
 
         // Secret Creator / VIP codes that grant 100% Free Lifetime VIP
         val VALID_VIP_CODES = setOf(
@@ -41,6 +43,25 @@ class UserPreferences(context: Context) {
         current.add(chapterId)
         unlockedChapterIds = current
     }
+
+    var completedStages: Set<Int>
+        get() {
+            val stringSet = prefs.getStringSet(KEY_COMPLETED_STAGES, emptySet()) ?: emptySet()
+            return stringSet.mapNotNull { it.toIntOrNull() }.toSet()
+        }
+        set(value) {
+            prefs.edit().putStringSet(KEY_COMPLETED_STAGES, value.map { it.toString() }.toSet()).apply()
+        }
+
+    fun markStageCompleted(stage: Int) {
+        val current = completedStages.toMutableSet()
+        current.add(stage)
+        completedStages = current
+    }
+
+    var activeStage: Int
+        get() = prefs.getInt(KEY_ACTIVE_STAGE, 1)
+        set(value) = prefs.edit().putInt(KEY_ACTIVE_STAGE, value).apply()
 
     var selectedRegionCode: String
         get() = prefs.getString(KEY_REGION_CODE, "IN") ?: "IN"
