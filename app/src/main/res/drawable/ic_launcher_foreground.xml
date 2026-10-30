@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="0"
+        android:translateY="0">
+        <!-- Outer Gold Diamond Shield Frame -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFD700"
+            android:strokeWidth="2.5"
+            android:pathData="M54,23 L79,48 L54,85 L29,48 Z" />
+        
+        <!-- Glowing Inner Accent -->
+        <path
+            android:fillColor="#15FFD700"
+            android:pathData="M54,26 L76,48 L54,82 L32,48 Z" />
+            
+        <!-- Candlestick Bar 1 (Left, ascending) -->
+        <path
+            android:fillColor="#E5B842"
+            android:pathData="M39,46 L43,46 L43,62 L39,62 Z" />
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFD700"
+            android:strokeWidth="1.2"
+            android:pathData="M41,40 L41,66" />
+
+        <!-- Candlestick Bar 2 (Center, higher) -->
+        <path
+            android:fillColor="#FFD700"
+            android:pathData="M52,38 L56,38 L56,56 L52,56 Z" />
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFE866"
+            android:strokeWidth="1.2"
+            android:pathData="M54,32 L54,61" />
+
+        <!-- Candlestick Bar 3 (Right, breakout peak) -->
+        <path
+            android:fillColor="#FFF099"
+            android:pathData="M65,30 L69,30 L69,47 L65,47 Z" />
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="1.2"
+            android:pathData="M67,25 L67,52" />
+
+        <!-- Ascending Gold Trend Line with Arrow -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFDF00"
+            android:strokeWidth="2"
+            android:pathData="M35,66 Q 50,56 71,28" />
+        <path
+            android:fillColor="#FFDF00"
+            android:pathData="M71,28 L64,30 L69,35 Z" />
+            
+        <!-- Gold Crown Star at Peak -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M72,26 L73.5,23 L75,26 L78,27.5 L75,29 L73.5,32 L72,29 L69,27.5 Z" />
+    </group>
+</vector>

@@ -1,0 +1,6 @@
+{
+  "name": "Trading:The Guidebook",
+  "description": "Daily expense and income tracker, regional wealth analytics, stock investment multiplier, live trade news, benevolent market glossary, and Gemini AI trade mentor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
