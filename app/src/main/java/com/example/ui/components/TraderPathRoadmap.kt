@@ -258,12 +258,12 @@ fun RoadmapStageCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .appleSpringPress(targetScale = 0.98f, onClick = if (isUnlocked) onClick else null)
             .border(
                 width = if (isActive) 1.5.dp else 1.dp,
                 color = borderColor,
                 shape = CitadelCardShape
-            )
-            .clickable(enabled = isUnlocked) { onClick() },
+            ),
         shape = CitadelCardShape,
         colors = CardDefaults.cardColors(containerColor = CitadelCard),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isActive) 6.dp else 2.dp)

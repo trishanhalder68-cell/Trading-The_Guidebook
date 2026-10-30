@@ -63,6 +63,7 @@ import com.example.ui.components.CitadelBadgeShape
 import com.example.ui.components.CitadelCardShape
 import com.example.ui.components.GoldSectionHeader
 import com.example.ui.components.LuxuryCard
+import com.example.ui.components.appleSpringPress
 import com.example.ui.theme.BrushedGold
 import com.example.ui.theme.CitadelCardElevated
 import com.example.ui.theme.CrimsonLoss
@@ -281,12 +282,12 @@ fun ChapterSyllabusCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .appleSpringPress(targetScale = 0.98f, onClick = onClick)
             .border(
                 1.dp,
                 if (isUnlocked) MetallicGoldBorder else Color(0xFF2E2E38),
                 CitadelCardShape
-            )
-            .clickable { onClick() },
+            ),
         shape = CitadelCardShape,
         colors = CardDefaults.cardColors(containerColor = CitadelCardElevated)
     ) {
@@ -471,7 +472,8 @@ fun ChapterLockedGate(
                 onClick = onUnlock,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
+                    .height(50.dp)
+                    .appleSpringPress(onClick = onUnlock),
                 shape = CutCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = BrushedGold,
@@ -488,7 +490,8 @@ fun ChapterLockedGate(
                 onClick = onOpenVipCheckout,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(46.dp),
+                    .height(46.dp)
+                    .appleSpringPress(onClick = onOpenVipCheckout),
                 shape = CutCornerShape(8.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = BrushedGold),
                 border = androidx.compose.foundation.BorderStroke(1.dp, MetallicGoldBorder)
@@ -675,7 +678,8 @@ fun ChapterFullReader(
             onClick = { onAskAiTutor(chapter.aiTutorStarterPrompt) },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
+                .height(50.dp)
+                .appleSpringPress(onClick = { onAskAiTutor(chapter.aiTutorStarterPrompt) }),
             shape = CutCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = BrushedGold,
@@ -694,7 +698,8 @@ fun ChapterFullReader(
                 onClick = { onSkipToNext(chapter.nextLevelId) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(46.dp),
+                    .height(46.dp)
+                    .appleSpringPress(onClick = { onSkipToNext(chapter.nextLevelId) }),
                 shape = CutCornerShape(8.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = BrushedGold),
                 border = androidx.compose.foundation.BorderStroke(1.dp, MetallicGoldBorder)

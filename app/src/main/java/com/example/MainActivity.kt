@@ -58,6 +58,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import com.example.ui.components.appleSpringPress
 import com.example.data.ai.configureAppCheck
 import com.example.ui.components.AddTransactionSheet
 import com.example.ui.components.MotivationalQuoteDialog
@@ -88,8 +94,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // STEP 1: Configure App Check with launch intent before any UI or Firebase operations
-        configureAppCheck(this, intent)
+        try {
+            // Configure App Check with launch intent before any UI or Firebase operations
+            configureAppCheck(this, intent)
+        } catch (t: Throwable) {
+            android.util.Log.e("MainActivity", "App Check initialization non-fatal error", t)
+        }
 
         enableEdgeToEdge()
 
@@ -123,10 +133,6 @@ fun MainAppScreen(viewModel: WealthViewModel) {
     val isVip by viewModel.isVipPro.collectAsState()
     val currentQuote by viewModel.currentQuote.collectAsState()
 
-    // Show motivational quote pop-up once on launch
-    LaunchedEffect(Unit) {
-        showQuoteDialog = true
-    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -180,6 +186,7 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                     shape = CircleShape,
                     modifier = Modifier
                         .size(56.dp)
+                        .appleSpringPress(onClick = { showAddTransactionSheet = true })
                         .testTag("fab_add_cashflow")
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add Transaction")
@@ -192,25 +199,32 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            when (NavigationTab.entries[selectedTab]) {
-                NavigationTab.HOME -> {
-                    HomeScreen(
-                        viewModel = viewModel,
-                        onOpenAddTransaction = { showAddTransactionSheet = true },
-                        onOpenCheckout = { showCheckoutModal = true },
-                        onOpenQuoteDialog = { showQuoteDialog = true },
-                        onNavigateToStage = { target ->
-                            when (target) {
-                                "home" -> selectedTab = 0
-                                "masterclass" -> selectedTab = 1
-                                "analytics" -> selectedTab = 2
-                                "simulation" -> selectedTab = 3
-                                "mentor" -> selectedTab = 4
-                                else -> selectedTab = 0
+            AnimatedContent(
+                targetState = selectedTab,
+                transitionSpec = {
+                    fadeIn(tween(240)) togetherWith fadeOut(tween(180))
+                },
+                label = "screen_transition"
+            ) { tabIdx ->
+                when (NavigationTab.entries[tabIdx]) {
+                    NavigationTab.HOME -> {
+                        HomeScreen(
+                            viewModel = viewModel,
+                            onOpenAddTransaction = { showAddTransactionSheet = true },
+                            onOpenCheckout = { showCheckoutModal = true },
+                            onOpenQuoteDialog = { showQuoteDialog = true },
+                            onNavigateToStage = { target ->
+                                when (target) {
+                                    "home" -> selectedTab = 0
+                                    "masterclass" -> selectedTab = 1
+                                    "analytics" -> selectedTab = 2
+                                    "simulation" -> selectedTab = 3
+                                    "mentor" -> selectedTab = 4
+                                    else -> selectedTab = 0
+                                }
                             }
-                        }
-                    )
-                }
+                        )
+                    }
                 NavigationTab.MASTERCLASS -> {
                     // Stage 2: Market Basics & Glossary
                     Column(modifier = Modifier.fillMaxSize()) {
@@ -360,6 +374,7 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                     AiMentorScreen(viewModel = viewModel)
                 }
             }
+        }
 
             // Modal Sheets
             if (showAddTransactionSheet) {

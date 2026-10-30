@@ -20,10 +20,19 @@ class FirestoreRepository(
     private val db: FirebaseFirestore
 ) {
     constructor(context: Context) : this(
-        FirebaseFirestore.getInstance(
-            context.applicationContext.getString(R.string.firestore_database_id)
-        )
+        try {
+            val dbId = context.applicationContext.getString(R.string.firestore_database_id)
+            if (dbId.isNotBlank()) {
+                FirebaseFirestore.getInstance(dbId)
+            } else {
+                FirebaseFirestore.getInstance()
+            }
+        } catch (e: Throwable) {
+            android.util.Log.w("FirestoreRepository", "Falling back to default Firestore instance", e)
+            FirebaseFirestore.getInstance()
+        }
     )
+
 
     fun observeUserProfile(userId: String): Flow<FirestoreUserProfile?> {
         val docRef = db.collection("users").document(userId)
