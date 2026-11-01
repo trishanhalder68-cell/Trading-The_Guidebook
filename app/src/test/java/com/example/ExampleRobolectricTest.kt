@@ -23,6 +23,7 @@ class ExampleRobolectricTest {
   fun `main activity launches successfully`() {
     val controller = org.robolectric.Robolectric.buildActivity(MainActivity::class.java)
     controller.create().start().resume()
+    org.robolectric.shadows.ShadowLooper.idleMainLooper()
   }
 }
 

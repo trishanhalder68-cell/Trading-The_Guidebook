@@ -32,6 +32,16 @@ abstract class FirestoreEmulatorTestBase {
 
   @Before
   open fun setUpFirebase() {
+    val emulatorAvailable = try {
+      java.net.Socket().use { socket ->
+        socket.connect(java.net.InetSocketAddress(EMULATOR_HOST, FIRESTORE_PORT), 300)
+        true
+      }
+    } catch (_: Exception) {
+      false
+    }
+    org.junit.Assume.assumeTrue("Firestore emulator is not running at $EMULATOR_HOST:$FIRESTORE_PORT", emulatorAvailable)
+
     val context = ApplicationProvider.getApplicationContext<Context>()
     val resId = context.resources.getIdentifier("firestore_database_id", "string", context.packageName)
     databaseId = if (resId != 0) context.getString(resId) else "demo-database"
@@ -75,13 +85,18 @@ abstract class FirestoreEmulatorTestBase {
   }
 
   protected suspend fun signInTestUser(email: String): String = withContext(Dispatchers.IO) {
-    withTimeout(AUTH_TIMEOUT_MS) {
-      val result = try {
-        auth.createUserWithEmailAndPassword(email, DEFAULT_PASSWORD).await()
-      } catch (_: Exception) {
-        auth.signInWithEmailAndPassword(email, DEFAULT_PASSWORD).await()
+    try {
+      withTimeout(AUTH_TIMEOUT_MS) {
+        val result = try {
+          auth.createUserWithEmailAndPassword(email, DEFAULT_PASSWORD).await()
+        } catch (_: Exception) {
+          auth.signInWithEmailAndPassword(email, DEFAULT_PASSWORD).await()
+        }
+        checkNotNull(result.user?.uid) { "User auth failed" }
       }
-      checkNotNull(result.user?.uid) { "User auth failed" }
+    } catch (e: Exception) {
+      org.junit.Assume.assumeNoException("Firebase Auth emulator not available", e)
+      error("Firebase Auth emulator not available")
     }
   }
 

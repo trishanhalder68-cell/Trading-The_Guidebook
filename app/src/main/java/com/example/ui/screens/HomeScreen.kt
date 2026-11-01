@@ -134,7 +134,11 @@ fun HomeScreen(
     val completedStages by viewModel.completedStages.collectAsState()
 
     val currency = region.currencySymbol
-    val currentUser = Firebase.auth.currentUser
+    val currentUser = try {
+        Firebase.auth.currentUser
+    } catch (_: Throwable) {
+        null
+    }
 
     // Live cycling button state: alternates seamlessly between "Start Learning" and "Start Income"
     var liveMode by remember { mutableIntStateOf(0) } // 0: Start Learning, 1: Start Income

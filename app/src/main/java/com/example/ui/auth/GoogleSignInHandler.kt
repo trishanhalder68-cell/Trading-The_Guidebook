@@ -39,8 +39,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
-import com.example.R
-import com.example.ui.theme.BrushedGold
+
 import com.example.ui.theme.SlateCharcoal
 import com.example.ui.theme.TrustBlue
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -64,12 +63,22 @@ fun attemptAutoSignIn(
     onUnauthenticated: () -> Unit,
     scope: CoroutineScope
 ) {
-    if (Firebase.auth.currentUser != null) {
+    val isAlreadySignedIn = try {
+        Firebase.auth.currentUser != null
+    } catch (_: Throwable) {
+        false
+    }
+    if (isAlreadySignedIn) {
         onAuthSuccess()
         return
     }
+    val resId = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
+    if (resId == 0) {
+        onUnauthenticated()
+        return
+    }
     val clientId = try {
-        context.getString(R.string.default_web_client_id)
+        context.getString(resId)
     } catch (e: Exception) {
         onUnauthenticated()
         return
@@ -109,8 +118,13 @@ fun onGoogleSignInClicked(
     scope: CoroutineScope,
     onAuthCancelled: () -> Unit = {}
 ) {
+    val resId = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
+    if (resId == 0) {
+        onAuthError("Google Sign-In configuration missing: default_web_client_id not found")
+        return
+    }
     val clientId = try {
-        context.getString(R.string.default_web_client_id)
+        context.getString(resId)
     } catch (e: Exception) {
         onAuthError("Google Sign-In configuration missing: default_web_client_id not found")
         return
@@ -152,7 +166,10 @@ fun signOutGoogle(
     onSignOutComplete: () -> Unit,
     scope: CoroutineScope
 ) {
-    Firebase.auth.signOut()
+    try {
+        Firebase.auth.signOut()
+    } catch (_: Throwable) {
+    }
     scope.launch {
         try {
             credentialManager.clearCredentialState(ClearCredentialStateRequest())

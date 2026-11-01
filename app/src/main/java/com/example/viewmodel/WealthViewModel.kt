@@ -77,7 +77,7 @@ class WealthViewModel(application: Application) : AndroidViewModel(application) 
             _activeStage.value = stage + 1
         }
         // If user is authenticated, sync profile to Firestore
-        val user = Firebase.auth.currentUser
+        val user = try { Firebase.auth.currentUser } catch (_: Throwable) { null }
         if (user != null) {
             viewModelScope.launch {
                 firestoreRepository.saveUserProfile(
@@ -196,7 +196,7 @@ class WealthViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             dao.insertTransaction(tx)
             completeStage(1) // Completes Stage 1: Money Foundations & Income Tracker!
-            val user = Firebase.auth.currentUser
+            val user = try { Firebase.auth.currentUser } catch (_: Throwable) { null }
             if (user != null) {
                 firestoreRepository.addTransaction(
                     userId = user.uid,

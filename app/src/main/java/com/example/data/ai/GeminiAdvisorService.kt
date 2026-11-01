@@ -31,11 +31,16 @@ enum class MessageSender {
 }
 
 class GeminiAdvisorService {
-    // GenerativeModel initialized lazily as required by Firebase AI Logic skill
-    private val model: GenerativeModel by lazy {
-        Firebase.ai.generativeModel(
-            modelName = "gemini-3.8-flash"
-        )
+    // GenerativeModel initialized lazily with safe fallback
+    private val model: GenerativeModel? by lazy {
+        try {
+            Firebase.ai.generativeModel(
+                modelName = "gemini-3.8-flash"
+            )
+        } catch (t: Throwable) {
+            Log.w(TAG, "GenerativeModel initialization skipped or not configured", t)
+            null
+        }
     }
 
     private val conversationHistory = mutableListOf<Content>()
@@ -87,7 +92,12 @@ class GeminiAdvisorService {
             } else {
                 emptyList()
             }
-            val chatSession: Chat = model.startChat(history = historyToSend)
+            val activeModel = model
+            if (activeModel == null) {
+                emit("Market Advisor note: AI Logic service is not initialized yet. You can still use the 4-Stage Trader's Path, Market Radar, and masterclasses!")
+                return@flow
+            }
+            val chatSession: Chat = activeModel.startChat(history = historyToSend)
 
             withTimeout(60_000L) {
                 val streamFlow = chatSession.sendMessageStream(promptToSend)
@@ -115,6 +125,7 @@ class GeminiAdvisorService {
         region: RegionCriteria,
         seedCount: Int
     ): List<IncomeOpportunity> {
+        val activeModel = model ?: return region.regionalIncomeMethods
         val prompt = """
             Provide 3 brand new, highly lucrative, actionable income opportunities specifically valid for ${region.name} (${region.currencyCode}).
             Categorize into: 1 remote/digital arbitrage, 1 equity/stock dividend tactic, and 1 localized micro-hustle.
@@ -132,7 +143,7 @@ class GeminiAdvisorService {
 
         return try {
             val response = withTimeout(45_000L) {
-                model.generateContent(prompt)
+                activeModel.generateContent(prompt)
             }
             val text = response.text ?: ""
             parseIdeasFromText(text, region)

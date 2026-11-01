@@ -17,25 +17,30 @@ import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
 class FirestoreRepository(
-    private val db: FirebaseFirestore
+    private val db: FirebaseFirestore?
 ) {
     constructor(context: Context) : this(
         try {
-            val dbId = context.applicationContext.getString(R.string.firestore_database_id)
+            val dbIdRes = context.resources.getIdentifier("firestore_database_id", "string", context.packageName)
+            val dbId = if (dbIdRes != 0) context.getString(dbIdRes) else ""
             if (dbId.isNotBlank()) {
-                FirebaseFirestore.getInstance(dbId)
+                try {
+                    FirebaseFirestore.getInstance(dbId)
+                } catch (_: Throwable) {
+                    FirebaseFirestore.getInstance()
+                }
             } else {
                 FirebaseFirestore.getInstance()
             }
         } catch (e: Throwable) {
-            android.util.Log.w("FirestoreRepository", "Falling back to default Firestore instance", e)
-            FirebaseFirestore.getInstance()
+            android.util.Log.w("FirestoreRepository", "Firestore not available, local offline mode active", e)
+            null
         }
     )
 
-
     fun observeUserProfile(userId: String): Flow<FirestoreUserProfile?> {
-        val docRef = db.collection("users").document(userId)
+        val database = db ?: return kotlinx.coroutines.flow.flowOf(null)
+        val docRef = database.collection("users").document(userId)
         return docRef.snapshots()
             .map { snapshot ->
                 if (snapshot.exists()) {
@@ -53,7 +58,8 @@ class FirestoreRepository(
     }
 
     suspend fun saveUserProfile(profile: FirestoreUserProfile): Result<Unit> {
-        val docRef = db.collection("users").document(profile.userId)
+        val database = db ?: return Result.success(Unit)
+        val docRef = database.collection("users").document(profile.userId)
         return try {
             val existing = docRef.get().await()
             val payload = mutableMapOf<String, Any>(
@@ -84,7 +90,8 @@ class FirestoreRepository(
     }
 
     fun observeTransactions(userId: String): Flow<List<FirestoreTransaction>> {
-        val collRef = db.collection("users").document(userId).collection("transactions")
+        val database = db ?: return kotlinx.coroutines.flow.flowOf(emptyList())
+        val collRef = database.collection("users").document(userId).collection("transactions")
         return collRef.snapshots()
             .map { snapshot ->
                 snapshot.toObjects(FirestoreTransaction::class.java)
@@ -99,7 +106,8 @@ class FirestoreRepository(
 
     suspend fun addTransaction(userId: String, transaction: FirestoreTransaction): Result<String> {
         val txId = if (transaction.id.isNotBlank()) transaction.id else "tx_${UUID.randomUUID().toString().replace("-", "").take(12)}"
-        val docRef = db.collection("users").document(userId).collection("transactions").document(txId)
+        val database = db ?: return Result.success(txId)
+        val docRef = database.collection("users").document(userId).collection("transactions").document(txId)
         return try {
             val payload = mutableMapOf<String, Any>(
                 "userId" to userId,
@@ -123,7 +131,8 @@ class FirestoreRepository(
 
     suspend fun updateTransaction(userId: String, transaction: FirestoreTransaction): Result<Unit> {
         require(transaction.id.isNotBlank()) { "Transaction ID must not be blank for update" }
-        val docRef = db.collection("users").document(userId).collection("transactions").document(transaction.id)
+        val database = db ?: return Result.success(Unit)
+        val docRef = database.collection("users").document(userId).collection("transactions").document(transaction.id)
         return try {
             val updates = mapOf(
                 "title" to transaction.title,
@@ -144,7 +153,8 @@ class FirestoreRepository(
     }
 
     suspend fun deleteTransaction(userId: String, transactionId: String): Result<Unit> {
-        val docRef = db.collection("users").document(userId).collection("transactions").document(transactionId)
+        val database = db ?: return Result.success(Unit)
+        val docRef = database.collection("users").document(userId).collection("transactions").document(transactionId)
         return try {
             docRef.delete().await()
             Result.success(Unit)

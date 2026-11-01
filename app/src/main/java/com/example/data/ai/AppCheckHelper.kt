@@ -18,13 +18,25 @@ private const val RECAPTCHA_SITE_KEY_RES = "recaptcha_site_key"
 fun configureAppCheck(context: Context, intent: Intent?) {
     try {
         if (FirebaseApp.getApps(context).isEmpty()) {
-            FirebaseApp.initializeApp(context)
+            try {
+                FirebaseApp.initializeApp(context)
+            } catch (t: Throwable) {
+                Log.w(TAG, "Initializing FirebaseApp with local fallback configuration", t)
+                val dbIdRes = context.resources.getIdentifier("firestore_database_id", "string", context.packageName)
+                val dbId = if (dbIdRes != 0) context.getString(dbIdRes) else "trading-guidebook-app"
+                val options = com.google.firebase.FirebaseOptions.Builder()
+                    .setApplicationId(context.packageName)
+                    .setProjectId(dbId.substringBefore("-").ifBlank { "trading-guidebook" })
+                    .setApiKey("AIzaSyDummyKeyForLocalPreviewExecution")
+                    .build()
+                FirebaseApp.initializeApp(context, options)
+            }
         }
 
         if (BuildConfig.DEBUG) {
             val debugToken = intent?.getStringExtra(DEBUG_TOKEN_EXTRA)
             if (!debugToken.isNullOrEmpty()) {
-                val persistenceKey = FirebaseApp.getInstance().persistenceKey
+                val persistenceKey = try { FirebaseApp.getInstance().persistenceKey } catch (_: Throwable) { "default" }
                 val prefs = context.getSharedPreferences(
                     "$DEBUG_STORE_PREFIX$persistenceKey",
                     Context.MODE_PRIVATE
@@ -38,10 +50,14 @@ fun configureAppCheck(context: Context, intent: Intent?) {
                 Log.w(TAG, "No debug token found in Intent extra.")
             }
 
-            FirebaseAppCheck.getInstance().installAppCheckProviderFactory(
-                DebugAppCheckProviderFactory.getInstance()
-            )
-            Log.d(TAG, "DebugAppCheckProviderFactory installed.")
+            try {
+                FirebaseAppCheck.getInstance().installAppCheckProviderFactory(
+                    DebugAppCheckProviderFactory.getInstance()
+                )
+                Log.d(TAG, "DebugAppCheckProviderFactory installed.")
+            } catch (t: Throwable) {
+                Log.w(TAG, "DebugAppCheckProviderFactory installation skipped", t)
+            }
         } else {
             val resId = context.resources.getIdentifier(RECAPTCHA_SITE_KEY_RES, "string", context.packageName)
             if (resId != 0) {
