@@ -8,7 +8,8 @@ data class MarketNewsItem(
     val sentiment: MarketSentiment,
     val summary: String,
     val keyTakeawayForTraders: String,
-    val category: String // "Macro", "Earnings", "Monetary Policy", "Indices"
+    val category: String, // "Macro", "Earnings", "Monetary Policy", "Indices"
+    val sourceUrl: String = "https://www.nseindia.com"
 )
 
 enum class MarketSentiment {
@@ -16,6 +17,15 @@ enum class MarketSentiment {
     BEARISH,
     NEUTRAL
 }
+
+data class InstitutionalPortal(
+    val id: String,
+    val title: String,
+    val subtitle: String,
+    val authority: String,
+    val url: String,
+    val badge: String
+)
 
 data class MarketTerm(
     val term: String,
@@ -33,46 +43,104 @@ data class MotivationalQuote(
 )
 
 object MarketGuidebookRepository {
+    val OFFICIAL_PORTALS = listOf(
+        InstitutionalPortal(
+            id = "portal_nse",
+            title = "NSE India Real-Time Market Tracker",
+            subtitle = "Live NIFTY 50, Bank NIFTY, and FII/DII daily institutional activity reports",
+            authority = "National Stock Exchange",
+            url = "https://www.nseindia.com",
+            badge = "LIVE NSE FEED"
+        ),
+        InstitutionalPortal(
+            id = "portal_rbi",
+            title = "Reserve Bank of India (RBI)",
+            subtitle = "Official MPC interest rate resolutions, repo rates, and banking liquidity reports",
+            authority = "Central Bank of India",
+            url = "https://www.rbi.org.in",
+            badge = "CENTRAL BANK"
+        ),
+        InstitutionalPortal(
+            id = "portal_sebi",
+            title = "SEBI Market Surveillance & Directives",
+            subtitle = "Securities and Exchange Board investor protection advisories and circulars",
+            authority = "Statutory Regulatory Body",
+            url = "https://www.sebi.gov.in",
+            badge = "SEBI REGULATOR"
+        ),
+        InstitutionalPortal(
+            id = "portal_mospi",
+            title = "MOSPI Macro Economic Statistics",
+            subtitle = "Official CPI Consumer Price Index inflation rates and GDP prints",
+            authority = "Ministry of Statistics",
+            url = "https://www.mospi.gov.in",
+            badge = "MACRO CPI"
+        ),
+        InstitutionalPortal(
+            id = "portal_google",
+            title = "Google Finance Real-Time Terminal",
+            subtitle = "Real-time interactive candlestick tracking for global benchmark indices and tech bellwethers",
+            authority = "Global Markets Telemetry",
+            url = "https://www.google.com/finance",
+            badge = "LIVE TERMINAL"
+        )
+    )
+
     val OFFICIAL_MARKET_NEWS = listOf(
         MarketNewsItem(
             id = "news_1",
             title = "Central Bank Holds Benchmark Rates Steady; Signals Data-Dependent Pivot",
-            source = "Monetary Policy Committee",
+            source = "RBI Monetary Policy Committee",
             timeAgo = "2h ago",
             sentiment = MarketSentiment.BULLISH,
             summary = "Central bank maintains repo rate at 6.50% while noting easing food supply pressures and steady core inflation trajectory.",
             keyTakeawayForTraders = "Bullish for rate-sensitive sectors including Banking, Real Estate, and Auto stocks. Lower probability of immediate rate hikes reduces corporate debt cost.",
-            category = "Monetary Policy"
+            category = "Monetary Policy",
+            sourceUrl = "https://www.rbi.org.in"
         ),
         MarketNewsItem(
             id = "news_2",
             title = "Foreign & Domestic Institutional Inflows Hit 4-Month High in Index Equities",
-            source = "Exchange Trading Data",
+            source = "NSE India Trading Intelligence",
             timeAgo = "4h ago",
             sentiment = MarketSentiment.BULLISH,
             summary = "DII net purchases exceeded ₹3,200 Crores alongside steady FII participation, absorbing local retail profit booking seamlessly.",
             keyTakeawayForTraders = "Strong institutional floor beneath benchmark support levels. Dips near the 50-day moving average are being aggressively bought by institutions.",
-            category = "Indices"
+            category = "Indices",
+            sourceUrl = "https://www.nseindia.com"
         ),
         MarketNewsItem(
             id = "news_3",
             title = "Tech & Semiconductor Giants Report Resilient Margin Expansion Driven by Enterprise Demand",
-            source = "Financial Markets Desk",
+            source = "Global Tech & Google Finance Desk",
             timeAgo = "6h ago",
             sentiment = MarketSentiment.BULLISH,
             summary = "Leading tech bellwethers beat quarterly operating margin forecasts by 140 bps, citing accelerated software automation and cloud adoption.",
             keyTakeawayForTraders = "Momentum breakout confirmed in mid-cap tech and IT services. Watch for volume confirmation before initiating long swing positions.",
-            category = "Earnings"
+            category = "Earnings",
+            sourceUrl = "https://www.google.com/finance"
         ),
         MarketNewsItem(
             id = "news_4",
             title = "Global Crude Oil Consolidates Below $76/Barrel on Inventory Replenishment",
-            source = "Commodities Bureau",
+            source = "Bloomberg Commodities Bureau",
             timeAgo = "8h ago",
             sentiment = MarketSentiment.NEUTRAL,
             summary = "Brent crude benchmark stabilized after inventory builds in major importing economies, dampening imported inflation concerns.",
             keyTakeawayForTraders = "Margin relief for paint, aviation, tire, and specialty chemical manufacturers whose raw material inputs track petroleum derivatives.",
-            category = "Macro"
+            category = "Macro",
+            sourceUrl = "https://www.bloomberg.com/markets"
+        ),
+        MarketNewsItem(
+            id = "news_5",
+            title = "SEBI Mandates Enhanced Risk Disclosure for F&O Derivative Participants",
+            source = "SEBI Investor Protection Directive",
+            timeAgo = "10h ago",
+            sentiment = MarketSentiment.NEUTRAL,
+            summary = "Market regulator reiterates that 9 out of 10 individual traders lose capital in futures and options, encouraging spot equity and structured learning.",
+            keyTakeawayForTraders = "Reinforces the importance of spot equity compounding, strict stop-losses, and avoiding leveraged lottery tickets.",
+            category = "Regulatory",
+            sourceUrl = "https://www.sebi.gov.in"
         )
     )
 

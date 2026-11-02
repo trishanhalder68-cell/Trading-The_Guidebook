@@ -27,13 +27,15 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun testVipPromoCodes() {
-        val validCodes = UserPreferences.VALID_VIP_CODES
-        assertTrue(validCodes.contains("VIPFREE"))
-        assertTrue(validCodes.contains("CREATOR100"))
-        assertTrue(validCodes.contains("GUIDEBOOK2026"))
-        assertTrue(validCodes.contains("TRADER"))
-        assertFalse(validCodes.contains("INVALID_CODE"))
+    fun testDeveloperCodeValidation() {
+        // Enforce that ONLY TRISH30 is the valid developer code
+        assertEquals("TRISH30", UserPreferences.VALID_DEVELOPER_CODE)
+        assertTrue(UserPreferences.VALID_VIP_CODES.contains("TRISH30"))
+        // Legacy codes should strictly NOT be authorized
+        assertFalse(UserPreferences.VALID_VIP_CODES.contains("VIPFREE"))
+        assertFalse(UserPreferences.VALID_VIP_CODES.contains("CREATOR100"))
+        assertFalse(UserPreferences.VALID_VIP_CODES.contains("TRADER"))
+        assertFalse(UserPreferences.VALID_VIP_CODES.contains("INVALID_CODE"))
     }
 
     @Test
@@ -47,7 +49,7 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun testMasterclassChaptersPresent() {
+    fun testMasterclassChaptersPresentAndPricing() {
         val chapters = com.example.data.model.MasterclassRepository.CHAPTERS
         assertEquals(6, chapters.size)
         assertTrue(chapters[0].isFree)
@@ -56,12 +58,26 @@ class ExampleUnitTest {
         assertFalse(chapters[3].isFree)
         assertFalse(chapters[4].isFree)
         assertFalse(chapters[5].isFree)
-        assertEquals(125, chapters[1].unlockPriceInr)
-        assertEquals(175, chapters[2].unlockPriceInr)
-        assertEquals(200, chapters[3].unlockPriceInr)
-        assertEquals(225, chapters[4].unlockPriceInr)
-        assertEquals(250, chapters[5].unlockPriceInr)
+
+        // All paid chapters are reduced to ₹20
+        assertEquals(20, chapters[1].unlockPriceInr)
+        assertEquals(20, chapters[2].unlockPriceInr)
+        assertEquals(20, chapters[3].unlockPriceInr)
+        assertEquals(20, chapters[4].unlockPriceInr)
+        assertEquals(20, chapters[5].unlockPriceInr)
+
         assertTrue(chapters[0].coreContentSections.isNotEmpty())
         assertTrue(chapters[0].agenda.isNotEmpty())
+    }
+
+    @Test
+    fun testInstitutionalPortalsPresent() {
+        val portals = MarketGuidebookRepository.OFFICIAL_PORTALS
+        assertTrue(portals.size >= 5)
+        assertTrue(portals.any { it.url.contains("nseindia.com") })
+        assertTrue(portals.any { it.url.contains("rbi.org.in") })
+        assertTrue(portals.any { it.url.contains("sebi.gov.in") })
+        assertTrue(portals.any { it.url.contains("mospi.gov.in") })
+        assertTrue(portals.any { it.url.contains("google.com/finance") })
     }
 }

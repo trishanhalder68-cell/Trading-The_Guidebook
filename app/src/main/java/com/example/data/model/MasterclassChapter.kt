@@ -8,7 +8,7 @@ data class MasterclassChapter(
     val subtitle: String,
     val estimatedReadMinutes: Int,
     val isFree: Boolean,
-    val unlockPriceInr: Int = 125,
+    val unlockPriceInr: Int = 20,
     val hookStatement: String,
     val agenda: List<String>,
     val coreContentSections: List<ChapterSection>,
@@ -118,7 +118,7 @@ object MasterclassRepository {
             subtitle = "Why cash guarantees poverty and how liquidity cycles dictate market booms",
             estimatedReadMinutes = 8,
             isFree = false,
-            unlockPriceInr = 125,
+            unlockPriceInr = 20,
             hookStatement = "Central banks print money by the trillions. If you do not understand interest rate cycles and repo rate pivots, you are flying blind in the market.",
             agenda = listOf(
                 "The 1971 Gold Standard Collapse: Why all modern currency is fiat",
@@ -175,7 +175,7 @@ object MasterclassRepository {
             subtitle = "Mastering corporate valuations, fixed income yields, and passive cashflow machines",
             estimatedReadMinutes = 9,
             isFree = false,
-            unlockPriceInr = 175,
+            unlockPriceInr = 20,
             hookStatement = "The world's wealthiest dynasties do not rely on active wage labor. They build diversified asset fortresses that generate compounding yield 365 days a year.",
             agenda = listOf(
                 "Equities Under the Microscope: P/E ratios, earnings yield, and free cash flow",
@@ -232,7 +232,7 @@ object MasterclassRepository {
             subtitle = "How hedge funds manipulate retail sentiment and how to trade alongside institutional giants",
             estimatedReadMinutes = 10,
             isFree = false,
-            unlockPriceInr = 200,
+            unlockPriceInr = 20,
             hookStatement = "Retail traders look at candlestick charts with hope. Institutional algorithms look at order books with precision. Learn how smart money accumulates positions without tipping their hand.",
             agenda = listOf(
                 "Why 90% of retail traders fail: Emotional bias, over-leveraging, and lack of edge",
@@ -289,7 +289,7 @@ object MasterclassRepository {
             subtitle = "From TradFi clearing houses to decentralized blockchains, smart contracts, and crypto",
             estimatedReadMinutes = 10,
             isFree = false,
-            unlockPriceInr = 225,
+            unlockPriceInr = 20,
             hookStatement = "For 400 years, every transaction required a bank or clearing house. In 2009, decentralized mathematics proved we could settle trillions with zero intermediaries.",
             agenda = listOf(
                 "The TradFi Plumbing: How brokers, custodians (CDSL/NSDL), and clearing houses operate",
@@ -346,7 +346,7 @@ object MasterclassRepository {
             subtitle = "The exact operational plan to transform daily savings into an unstoppable multi-million portfolio",
             estimatedReadMinutes = 11,
             isFree = false,
-            unlockPriceInr = 250,
+            unlockPriceInr = 20,
             hookStatement = "Knowledge without structured execution is meaningless. Here is the unshakeable 7-day master execution plan to build lasting financial independence.",
             agenda = listOf(
                 "Day 1–2: The Cashflow Velocity Audit—Automating your savings allocation",

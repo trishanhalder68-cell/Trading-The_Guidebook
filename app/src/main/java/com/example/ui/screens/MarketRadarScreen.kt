@@ -53,7 +53,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import com.example.data.model.IncomeOpportunity
+import com.example.data.model.InstitutionalPortal
+import com.example.data.model.MarketGuidebookRepository
 import com.example.data.model.MarketNewsItem
 import com.example.data.model.MarketSentiment
 import com.example.data.model.RegionRepository
@@ -75,6 +82,7 @@ import com.example.viewmodel.WealthViewModel
 fun MarketRadarScreen(
     viewModel: WealthViewModel
 ) {
+    val context = LocalContext.current
     val region by viewModel.currentRegion.collectAsState()
     val opportunities by viewModel.incomeOpportunities.collectAsState()
     val isGenerating by viewModel.isGeneratingIdeas.collectAsState()
@@ -299,6 +307,25 @@ fun MarketRadarScreen(
         item {
             Spacer(modifier = Modifier.height(24.dp))
 
+            // OFFICIAL INSTITUTIONAL PORTALS & LIVE DESKS
+            GoldSectionHeader(
+                title = "Official Market Desks & Live Portals",
+                subtitle = "Direct institutional feeds from central banks & exchanges",
+                badgeText = "Verified Links"
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            MarketGuidebookRepository.OFFICIAL_PORTALS.forEach { portal ->
+                InstitutionalPortalCard(
+                    portal = portal,
+                    onClick = { openUrlSafely(context, portal.url) }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             // OFFICIAL CRUCIAL STOCK MARKET NEWS
             GoldSectionHeader(
                 title = "Crucial Market News & Catalysts",
@@ -310,7 +337,10 @@ fun MarketRadarScreen(
         }
 
         items(newsList, key = { it.id }) { news ->
-            MarketNewsCard(news = news)
+            MarketNewsCard(
+                news = news,
+                onOpenUrl = { url -> openUrlSafely(context, url) }
+            )
             Spacer(modifier = Modifier.height(10.dp))
         }
 
@@ -434,7 +464,86 @@ fun IncomeOpportunityCard(
 }
 
 @Composable
-fun MarketNewsCard(news: MarketNewsItem) {
+fun InstitutionalPortalCard(
+    portal: InstitutionalPortal,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, GoldBorder.copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = ObsidianCardElevated),
+        shape = RoundedCornerShape(14.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(ImperialGold.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Public,
+                    contentDescription = null,
+                    tint = ImperialGold,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = portal.title,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(ImperialGold.copy(alpha = 0.2f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = portal.badge,
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GoldGleam
+                        )
+                    }
+                }
+                Text(
+                    text = portal.subtitle,
+                    fontSize = 11.sp,
+                    color = TextSecondary,
+                    lineHeight = 15.sp,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                contentDescription = "Open Link",
+                tint = ImperialGold,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun MarketNewsCard(
+    news: MarketNewsItem,
+    onOpenUrl: (String) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -499,6 +608,57 @@ fun MarketNewsCard(news: MarketNewsItem) {
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Direct Official Institutional Link with safe navigation
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(ImperialGold.copy(alpha = 0.1f))
+                    .border(1.dp, ImperialGold.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
+                    .clickable { onOpenUrl(news.sourceUrl) }
+                    .padding(horizontal = 10.dp, vertical = 7.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Source: ${news.source}",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = GoldGleam
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Open Bulletin",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = ImperialGold
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                        contentDescription = "Open Source",
+                        tint = ImperialGold,
+                        modifier = Modifier.size(13.dp)
+                    )
+                }
+            }
         }
+    }
+}
+
+/**
+ * Crash-proof browser launcher that safely handles missing activity or headless test environments.
+ */
+private fun openUrlSafely(context: Context, url: String) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        context.startActivity(intent)
+    } catch (_: Exception) {
+        // Safe fallback - prevents ActivityNotFoundException crashes
     }
 }

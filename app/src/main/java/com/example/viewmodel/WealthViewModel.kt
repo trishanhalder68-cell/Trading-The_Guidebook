@@ -238,6 +238,8 @@ class WealthViewModel(application: Application) : AndroidViewModel(application) 
         if (success) {
             _isVipPro.value = true
             _appliedPromoCode.value = prefs.appliedPromoCode
+            _unlockedChapterIds.value = prefs.unlockedChapterIds
+            _completedStages.value = prefs.completedStages
         }
         return success
     }
@@ -246,12 +248,16 @@ class WealthViewModel(application: Application) : AndroidViewModel(application) 
         prefs.unlockVipPaid(method)
         _isVipPro.value = true
         _appliedPromoCode.value = prefs.appliedPromoCode
+        _unlockedChapterIds.value = prefs.unlockedChapterIds
+        _completedStages.value = prefs.completedStages
     }
 
     fun resetVip() {
         prefs.resetVipStatus()
         _isVipPro.value = false
         _appliedPromoCode.value = ""
+        _unlockedChapterIds.value = prefs.unlockedChapterIds
+        _completedStages.value = prefs.completedStages
     }
 
     fun generateMoreIncomeIdeas() {

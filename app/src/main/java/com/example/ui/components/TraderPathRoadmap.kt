@@ -102,7 +102,7 @@ val TRADER_ROADMAP_STAGES = listOf(
             "Institutional Smart Money Concepts (SMC)"
         ),
         targetTab = "masterclass",
-        tierLabel = "Level 2 • Pro Pass ₹129",
+        tierLabel = "Level 2 • Pro Pass ₹20",
         isProTier = true
     ),
     RoadmapStage(
@@ -118,7 +118,7 @@ val TRADER_ROADMAP_STAGES = listOf(
             "Review official market sentiment trends"
         ),
         targetTab = "analytics",
-        tierLabel = "Level 3 • Pro Pass ₹129",
+        tierLabel = "Level 3 • Pro Pass ₹20",
         isProTier = true
     ),
     RoadmapStage(
@@ -410,7 +410,7 @@ fun AppleRoadmapStageCard(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Unlock Level ${stage.stageNumber} • ₹129 Micro-Pass",
+                            text = "Unlock Level ${stage.stageNumber} • ₹20 Micro-Pass",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color(0xFF7A570C)

@@ -1,8 +1,6 @@
 package com.example.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
@@ -32,6 +30,7 @@ import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -52,20 +51,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.BrushedGold
-import com.example.ui.theme.CreamBackground
-import com.example.ui.theme.CreamBorder
-import com.example.ui.theme.CreamContainer
-import com.example.ui.theme.CreamSurface
 import com.example.ui.theme.EmeraldProfit
-import com.example.ui.theme.GoldGleam
 import com.example.ui.theme.SageGreen
 import com.example.ui.theme.SageGreenContainer
 import com.example.ui.theme.SageGreenText
@@ -77,10 +70,13 @@ import com.example.ui.theme.Squircle12
 import com.example.ui.theme.Squircle16
 import com.example.ui.theme.Squircle20
 import com.example.ui.theme.Squircle24
-import com.example.ui.theme.Squircle28
 import com.example.ui.theme.Squircle32
 import com.example.ui.theme.TrustBlue
 import com.example.ui.theme.TrustBlueContainer
+import com.example.ui.theme.WarmBeigeBackground
+import com.example.ui.theme.WarmBeigeBorder
+import com.example.ui.theme.WarmBeigeCard
+import com.example.ui.theme.WarmBeigeContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,14 +93,14 @@ fun PaymentCheckoutModal(
     var codeError by remember { mutableStateOf<String?>(null) }
     var codeSuccess by remember { mutableStateOf(false) }
 
-    // Pricing tier selection: "MICRO_PRO" (₹129 Launch Pass) or "ANNUAL" (₹999 Sovereign)
+    // Pricing tier selection: "MICRO_PRO" (₹20 Launch Pass) or "ANNUAL" (₹999 Sovereign)
     var selectedTier by remember { mutableStateOf("MICRO_PRO") }
     var selectedPaymentMethod by remember { mutableStateOf("UPI / Google Pay") }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = Color(0xFFFAF9F7),
+        containerColor = WarmBeigeBackground,
         shape = Squircle32
     ) {
         Column(
@@ -143,7 +139,7 @@ fun PaymentCheckoutModal(
                         color = SlateCharcoal
                     )
                     Text(
-                        text = "Level 2 & 3 Advanced Execution Unlock",
+                        text = "Institutional Execution & Masterclass Unlock",
                         fontSize = 12.sp,
                         color = SlateMuted
                     )
@@ -165,7 +161,7 @@ fun PaymentCheckoutModal(
                 AppleGlassCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = Squircle24,
-                    backgroundColor = Color.White,
+                    backgroundColor = WarmBeigeCard,
                     borderColor = EmeraldProfit.copy(alpha = 0.4f),
                     elevation = 4.dp
                 ) {
@@ -189,13 +185,13 @@ fun PaymentCheckoutModal(
                         }
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "Citadel All-Access Unlocked",
+                            text = "All Courses & Levels Unlocked",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = SlateCharcoal
                         )
                         Text(
-                            text = "You have full unrestricted access to all 6 Masterclass Levels, the AI Mentor, and live order flow telemetry.",
+                            text = "You have full unrestricted access to all 6 Masterclass Pillars, the AI Mentor desk, and live institutional order flow radar.",
                             fontSize = 12.sp,
                             color = SlateMuted,
                             textAlign = TextAlign.Center,
@@ -212,12 +208,12 @@ fun PaymentCheckoutModal(
                     }
                 }
             } else {
-                // Non-intrusive micro-transaction tier card (₹129 tier)
+                // Micro-transaction tier card (Reduced price to ₹20 per lesson)
                 AppleGlassCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = Squircle24,
-                    backgroundColor = if (selectedTier == "MICRO_PRO") Color.White else Color(0xFFF8FAFC),
-                    borderColor = if (selectedTier == "MICRO_PRO") TrustBlue else CreamBorder,
+                    backgroundColor = if (selectedTier == "MICRO_PRO") Color.White else WarmBeigeCard,
+                    borderColor = if (selectedTier == "MICRO_PRO") TrustBlue else WarmBeigeBorder,
                     elevation = if (selectedTier == "MICRO_PRO") 6.dp else 2.dp,
                     onClick = { selectedTier = "MICRO_PRO" }
                 ) {
@@ -230,7 +226,7 @@ fun PaymentCheckoutModal(
                                     .padding(horizontal = 9.dp, vertical = 4.dp)
                             ) {
                                 Text(
-                                    text = "POPULAR MICRO-PASS",
+                                    text = "SPECIAL PRICE • ₹20 ONLY",
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SageGreenText
@@ -238,7 +234,7 @@ fun PaymentCheckoutModal(
                             }
                             Spacer(modifier = Modifier.weight(1f))
                             Text(
-                                text = "One-Time Unlock",
+                                text = "Single Lesson Pass",
                                 fontSize = 11.sp,
                                 color = SlateMuted,
                                 fontWeight = FontWeight.Medium
@@ -250,20 +246,20 @@ fun PaymentCheckoutModal(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Level 2 & 3 Pro Pass",
+                                    text = "Single Lesson / Pillar Pass",
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SlateCharcoal
                                 )
                                 Text(
-                                    text = "Unlock 1% Risk Law, VWAP Breakouts & Order Blocks",
+                                    text = "Unlock 1% Risk Law, VWAP Breakouts & Liquidity Blocks",
                                     fontSize = 12.sp,
                                     color = SlateMuted
                                 )
                             }
                             Text(
-                                text = "$currencySymbol 129",
-                                fontSize = 24.sp,
+                                text = "$currencySymbol 20",
+                                fontSize = 26.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = TrustBlue
                             )
@@ -272,10 +268,10 @@ fun PaymentCheckoutModal(
                         Spacer(modifier = Modifier.height(14.dp))
 
                         listOf(
-                            "Immediate unlock for Chapters 3, 4, 5 and 6",
-                            "Candlestick & Order Flow Imbalance drills",
+                            "Immediate unlock for any paid Masterclass Lesson",
+                            "Candlestick & Order Flow Imbalance interactive drills",
                             "Full Clearance Certificate to trade live markets",
-                            "Special ₹129 Launch pricing (regular ₹499)"
+                            "Reduced launch price: ₹20 per lesson"
                         ).forEach { perk ->
                             Row(
                                 modifier = Modifier.padding(vertical = 3.dp),
@@ -300,8 +296,8 @@ fun PaymentCheckoutModal(
                 AppleGlassCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = Squircle20,
-                    backgroundColor = if (selectedTier == "ANNUAL") Color.White else Color(0xFFF8FAFC),
-                    borderColor = if (selectedTier == "ANNUAL") BrushedGold else CreamBorder,
+                    backgroundColor = if (selectedTier == "ANNUAL") Color.White else WarmBeigeCard,
+                    borderColor = if (selectedTier == "ANNUAL") BrushedGold else WarmBeigeBorder,
                     elevation = if (selectedTier == "ANNUAL") 4.dp else 1.dp,
                     onClick = { selectedTier = "ANNUAL" }
                 ) {
@@ -319,7 +315,7 @@ fun PaymentCheckoutModal(
                                 )
                             }
                             Text(
-                                text = "Unlimited AI Mentor + Macro Radar + All Future Levels",
+                                text = "All 6 Pillars + Unlimited AI Mentor + Macro Radar",
                                 fontSize = 11.sp,
                                 color = SlateMuted
                             )
@@ -335,36 +331,65 @@ fun PaymentCheckoutModal(
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Secret Access / Promo Code Section in Squircle
+                // =============================================================
+                // DEDICATED DEVELOPER CODE SECTION (Near the Merchant Area)
+                // Entering code "TRISH30" unlocks all courses.
+                // =============================================================
                 AppleGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("developer_code_card"),
                     shape = Squircle20,
                     backgroundColor = Color.White,
-                    borderColor = Color(0xFFE2E8F0),
-                    elevation = 2.dp
+                    borderColor = if (codeSuccess) EmeraldProfit else BrushedGold.copy(alpha = 0.5f),
+                    elevation = 3.dp
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Key,
-                                contentDescription = null,
-                                tint = TrustBlue,
-                                modifier = Modifier.size(17.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Have an Authorized Access Code?",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = SlateCharcoal
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(Squircle12)
+                                    .background(WarmBeigeContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Key,
+                                    contentDescription = null,
+                                    tint = BrushedGold,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Developer Code",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SlateCharcoal
+                                )
+                                Text(
+                                    text = "Enter authorized code to unlock all courses",
+                                    fontSize = 11.sp,
+                                    color = SlateMuted
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .clip(Squircle12)
+                                    .background(WarmBeigeContainer)
+                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                            ) {
+                                Text(
+                                    text = "VIP UNLOCK",
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SlateMuted
+                                )
+                            }
                         }
-                        Text(
-                            text = "Enter your private VIP invite or student pass code.",
-                            fontSize = 11.sp,
-                            color = SlateMuted,
-                            modifier = Modifier.padding(top = 2.dp, bottom = 10.dp)
-                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -376,12 +401,14 @@ fun PaymentCheckoutModal(
                                     accessCodeInput = it
                                     codeError = null
                                 },
-                                placeholder = { Text("e.g. VIPFREE or TRADER", fontSize = 12.sp) },
-                                modifier = Modifier.weight(1f),
+                                placeholder = { Text("Enter TRISH30", fontSize = 12.sp) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("developer_code_input"),
                                 shape = Squircle12,
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = TrustBlue,
-                                    unfocusedBorderColor = Color(0xFFCBD5E1),
+                                    focusedBorderColor = BrushedGold,
+                                    unfocusedBorderColor = WarmBeigeBorder,
                                     focusedTextColor = SlateCharcoal,
                                     unfocusedTextColor = SlateCharcoal
                                 ),
@@ -395,16 +422,17 @@ fun PaymentCheckoutModal(
                                         codeSuccess = true
                                         codeError = null
                                     } else {
-                                        codeError = "Invalid or expired authorization code."
+                                        codeError = "Invalid code. Only 'TRISH30' unlocks all courses."
                                     }
                                 },
                                 shape = Squircle12,
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = TrustBlue,
                                     contentColor = Color.White
-                                )
+                                ),
+                                modifier = Modifier.testTag("apply_developer_code_button")
                             ) {
-                                Text("Apply", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text("Unlock All", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
 
@@ -413,26 +441,43 @@ fun PaymentCheckoutModal(
                                 text = codeError!!,
                                 color = Color(0xFFEF4444),
                                 fontSize = 11.sp,
-                                modifier = Modifier.padding(top = 4.dp)
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(top = 6.dp)
                             )
                         }
                         if (codeSuccess) {
-                            Text(
-                                text = "Code Verified: Sovereign Access Activated!",
-                                color = EmeraldProfit,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp)
+                                    .clip(Squircle12)
+                                    .background(SageGreenContainer)
+                                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = SageGreen,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Code TRISH30 Verified: All Courses & Stages Unlocked!",
+                                    color = SageGreenText,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Payment Gateway Selection
+                // Payment Gateway / Merchant Selection Section
                 Text(
-                    text = "Select Payment Method",
+                    text = "Select Merchant Payment Method",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     color = SlateCharcoal
@@ -453,7 +498,7 @@ fun PaymentCheckoutModal(
                             .padding(vertical = 3.dp),
                         shape = Squircle16,
                         backgroundColor = if (isSelected) TrustBlueContainer.copy(alpha = 0.6f) else Color.White,
-                        borderColor = if (isSelected) TrustBlue else CreamBorder,
+                        borderColor = if (isSelected) TrustBlue else WarmBeigeBorder,
                         elevation = if (isSelected) 3.dp else 1.dp,
                         onClick = { selectedPaymentMethod = name }
                     ) {
@@ -504,6 +549,7 @@ fun PaymentCheckoutModal(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp)
+                        .testTag("confirm_payment_button")
                         .appleSpringPress(
                             onClick = {
                                 onPayWithMethod(selectedPaymentMethod)
@@ -524,7 +570,7 @@ fun PaymentCheckoutModal(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (selectedTier == "MICRO_PRO") "Unlock Pro Pass for $currencySymbol 129" else "Unlock Annual Pass for $currencySymbol 999",
+                        text = if (selectedTier == "MICRO_PRO") "Unlock Lesson for $currencySymbol 20" else "Unlock Annual Pass for $currencySymbol 999",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )

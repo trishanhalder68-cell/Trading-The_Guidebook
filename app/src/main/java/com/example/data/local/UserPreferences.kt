@@ -17,15 +17,9 @@ class UserPreferences(context: Context) {
         private const val KEY_ACTIVE_STAGE = "active_roadmap_stage"
         private const val KEY_COMPLETED_LESSONS = "completed_lesson_ids"
 
-        // Secret Creator / VIP codes that grant 100% Free Lifetime VIP
-        val VALID_VIP_CODES = setOf(
-            "VIPFREE",
-            "CREATOR100",
-            "GUIDEBOOK2026",
-            "TRADER",
-            "APEXVIP",
-            "FREELIFETIME"
-        )
+        // Dedicated Developer code that grants 100% Free Lifetime VIP & Unlocks All Courses
+        const val VALID_DEVELOPER_CODE = "TRISH30"
+        val VALID_VIP_CODES = setOf(VALID_DEVELOPER_CODE)
     }
 
     private val defaultUnlockedChapters = setOf("ch_1")
@@ -98,9 +92,11 @@ class UserPreferences(context: Context) {
 
     fun unlockVipWithCode(code: String): Boolean {
         val cleanCode = code.trim().uppercase()
-        return if (VALID_VIP_CODES.contains(cleanCode)) {
+        return if (cleanCode == VALID_DEVELOPER_CODE) {
             isVipPro = true
             appliedPromoCode = cleanCode
+            unlockedChapterIds = setOf("ch_1", "ch_2", "ch_3", "ch_4", "ch_5", "ch_6")
+            completedStages = setOf(1, 2, 3, 4)
             true
         } else {
             false
