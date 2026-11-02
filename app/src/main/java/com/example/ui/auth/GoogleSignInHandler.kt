@@ -4,6 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
@@ -243,3 +247,68 @@ fun GoogleSignInButton(
         }
     }
 }
+
+@Composable
+fun CompactGoogleSignInChip(
+    onAuthSuccess: () -> Unit,
+    onAuthError: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val credentialManager = remember { CredentialManager.create(context) }
+    var isLoading by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = modifier
+            .clip(com.example.ui.theme.Squircle12)
+            .background(Color.White)
+            .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), com.example.ui.theme.Squircle12)
+            .clickable(enabled = !isLoading) {
+                isLoading = true
+                onGoogleSignInClicked(
+                    context = context,
+                    credentialManager = credentialManager,
+                    onAuthSuccess = {
+                        isLoading = false
+                        onAuthSuccess()
+                    },
+                    onAuthError = { error ->
+                        isLoading = false
+                        onAuthError(error)
+                    },
+                    scope = coroutineScope,
+                    onAuthCancelled = {
+                        isLoading = false
+                    }
+                )
+            }
+            .padding(horizontal = 9.dp, vertical = 5.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(13.dp),
+                color = TrustBlue,
+                strokeWidth = 1.8.dp
+            )
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "Sign in",
+                    tint = TrustBlue,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Sign in",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp,
+                    color = SlateCharcoal
+                )
+            }
+        }
+    }
+}
+

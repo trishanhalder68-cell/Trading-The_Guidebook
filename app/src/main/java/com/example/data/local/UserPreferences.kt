@@ -15,6 +15,7 @@ class UserPreferences(context: Context) {
         private const val KEY_UNLOCKED_CHAPTERS = "unlocked_chapter_ids"
         private const val KEY_COMPLETED_STAGES = "completed_roadmap_stages"
         private const val KEY_ACTIVE_STAGE = "active_roadmap_stage"
+        private const val KEY_COMPLETED_LESSONS = "completed_lesson_ids"
 
         // Secret Creator / VIP codes that grant 100% Free Lifetime VIP
         val VALID_VIP_CODES = setOf(
@@ -42,6 +43,22 @@ class UserPreferences(context: Context) {
         val current = unlockedChapterIds.toMutableSet()
         current.add(chapterId)
         unlockedChapterIds = current
+    }
+
+    private val defaultCompletedLessons = setOf("tree_lesson_1")
+
+    var completedLessonIds: Set<String>
+        get() = prefs.getStringSet(KEY_COMPLETED_LESSONS, defaultCompletedLessons) ?: defaultCompletedLessons
+        set(value) = prefs.edit().putStringSet(KEY_COMPLETED_LESSONS, value).apply()
+
+    fun markLessonCompleted(lessonId: String) {
+        val current = completedLessonIds.toMutableSet()
+        current.add(lessonId)
+        completedLessonIds = current
+    }
+
+    fun isLessonCompleted(lessonId: String): Boolean {
+        return completedLessonIds.contains(lessonId)
     }
 
     var completedStages: Set<Int>

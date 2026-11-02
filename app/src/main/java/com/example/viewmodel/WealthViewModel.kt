@@ -64,6 +64,15 @@ class WealthViewModel(application: Application) : AndroidViewModel(application) 
     private val _completedStages = MutableStateFlow(prefs.completedStages)
     val completedStages: StateFlow<Set<Int>> = _completedStages.asStateFlow()
 
+    // Interactive Learning Flowchart Tree & Badges State
+    private val _completedLessons = MutableStateFlow(prefs.completedLessonIds)
+    val completedLessons: StateFlow<Set<String>> = _completedLessons.asStateFlow()
+
+    fun completeLesson(lessonId: String) {
+        prefs.markLessonCompleted(lessonId)
+        _completedLessons.value = prefs.completedLessonIds
+    }
+
     fun selectRoadmapStage(stage: Int) {
         prefs.activeStage = stage
         _activeStage.value = stage

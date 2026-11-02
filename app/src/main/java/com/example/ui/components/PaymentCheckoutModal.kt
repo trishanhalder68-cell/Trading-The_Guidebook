@@ -1,5 +1,11 @@
 package com.example.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,7 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
@@ -30,8 +35,6 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -56,14 +60,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.BrushedGold
-import com.example.ui.theme.CitadelCardElevated
+import com.example.ui.theme.CreamBackground
+import com.example.ui.theme.CreamBorder
+import com.example.ui.theme.CreamContainer
+import com.example.ui.theme.CreamSurface
 import com.example.ui.theme.EmeraldProfit
 import com.example.ui.theme.GoldGleam
-import com.example.ui.theme.MetallicGoldBorder
-import com.example.ui.theme.ObsidianBlack
-import com.example.ui.theme.TextPrimary
-import com.example.ui.theme.TextSecondary
-import com.example.ui.theme.TextTertiary
+import com.example.ui.theme.SageGreen
+import com.example.ui.theme.SageGreenContainer
+import com.example.ui.theme.SageGreenText
+import com.example.ui.theme.SlateCharcoal
+import com.example.ui.theme.SlateDark
+import com.example.ui.theme.SlateMuted
+import com.example.ui.theme.SlateSubtle
+import com.example.ui.theme.Squircle12
+import com.example.ui.theme.Squircle16
+import com.example.ui.theme.Squircle20
+import com.example.ui.theme.Squircle24
+import com.example.ui.theme.Squircle28
+import com.example.ui.theme.Squircle32
+import com.example.ui.theme.TrustBlue
+import com.example.ui.theme.TrustBlueContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,204 +97,293 @@ fun PaymentCheckoutModal(
     var codeError by remember { mutableStateOf<String?>(null) }
     var codeSuccess by remember { mutableStateOf(false) }
 
-    var selectedTier by remember { mutableStateOf("YEARLY") } // "YEARLY" or "LEVEL"
+    // Pricing tier selection: "MICRO_PRO" (₹129 Launch Pass) or "ANNUAL" (₹999 Sovereign)
+    var selectedTier by remember { mutableStateOf("MICRO_PRO") }
     var selectedPaymentMethod by remember { mutableStateOf("UPI / Google Pay") }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = ObsidianBlack,
-        shape = CutCornerShape(topStart = 20.dp, topEnd = 20.dp)
+        containerColor = Color(0xFFFAF9F7),
+        shape = Squircle32
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 22.dp)
+                .padding(horizontal = 24.dp)
                 .padding(bottom = 36.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Citadel Header
+            // Apple-HIG Header with squircle emblem
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CutCornerShape(8.dp))
-                        .background(BrushedGold.copy(alpha = 0.15f))
-                        .border(1.2.dp, MetallicGoldBorder, CutCornerShape(8.dp)),
+                        .size(42.dp)
+                        .clip(Squircle16)
+                        .background(TrustBlueContainer)
+                        .border(BorderStroke(1.dp, TrustBlue.copy(alpha = 0.3f)), Squircle16),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(imageVector = Icons.Default.AutoAwesome, contentDescription = null, tint = BrushedGold)
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = TrustBlue,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(14.dp))
                 Column {
                     Text(
                         text = "Citadel Trading Pass",
-                        fontSize = 18.sp,
+                        fontSize = 19.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary
+                        color = SlateCharcoal
                     )
                     Text(
-                        text = "Apex Trading Technologies Ltd. • Public Launch Ready",
-                        fontSize = 11.sp,
-                        color = BrushedGold
+                        text = "Level 2 & 3 Advanced Execution Unlock",
+                        fontSize = 12.sp,
+                        color = SlateMuted
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = onDismiss) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = TextTertiary)
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        tint = SlateSubtle
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             if (isAlreadyVip) {
-                // Active VIP Status Card
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.2.dp, EmeraldProfit, CutCornerShape(14.dp)),
-                    colors = CardDefaults.cardColors(containerColor = CitadelCardElevated),
-                    shape = CutCornerShape(14.dp)
+                // Active VIP Status Card in Apple-HIG Squircle
+                AppleGlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = Squircle24,
+                    backgroundColor = Color.White,
+                    borderColor = EmeraldProfit.copy(alpha = 0.4f),
+                    elevation = 4.dp
                 ) {
-                    Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(imageVector = Icons.Default.Verified, contentDescription = null, tint = EmeraldProfit, modifier = Modifier.size(44.dp))
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Annual All-Access Active", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    Column(
+                        modifier = Modifier.padding(22.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(54.dp)
+                                .clip(Squircle20)
+                                .background(SageGreenContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Verified,
+                                contentDescription = null,
+                                tint = SageGreen,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "You hold full unrestricted access to all 6 Masterclass Levels, the Gemini AI Market Mentor, and live economic telemetry.",
-                            fontSize = 12.sp,
-                            color = TextSecondary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(top = 4.dp)
+                            text = "Citadel All-Access Unlocked",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SlateCharcoal
                         )
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Text(
+                            text = "You have full unrestricted access to all 6 Masterclass Levels, the AI Mentor, and live order flow telemetry.",
+                            fontSize = 12.sp,
+                            color = SlateMuted,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(top = 6.dp)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
                         OutlinedButton(
                             onClick = onResetVip,
-                            shape = CutCornerShape(8.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextTertiary)
+                            shape = Squircle12,
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = SlateMuted)
                         ) {
                             Text("Reset Access State (Dev Mode)", fontSize = 11.sp)
                         }
                     }
                 }
             } else {
-                // Pricing Switcher Card: Annual ₹999 vs Micro-Level
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(
-                            1.5.dp,
-                            Brush.linearGradient(listOf(MetallicGoldBorder, Color(0xFF6B531B), MetallicGoldBorder)),
-                            CutCornerShape(16.dp)
-                        ),
-                    colors = CardDefaults.cardColors(containerColor = CitadelCardElevated),
-                    shape = CutCornerShape(16.dp)
+                // Non-intrusive micro-transaction tier card (₹129 tier)
+                AppleGlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = Squircle24,
+                    backgroundColor = if (selectedTier == "MICRO_PRO") Color.White else Color(0xFFF8FAFC),
+                    borderColor = if (selectedTier == "MICRO_PRO") TrustBlue else CreamBorder,
+                    elevation = if (selectedTier == "MICRO_PRO") 6.dp else 2.dp,
+                    onClick = { selectedTier = "MICRO_PRO" }
                 ) {
-                    Column(modifier = Modifier.padding(18.dp)) {
+                    Column(modifier = Modifier.padding(20.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .clip(CutCornerShape(6.dp))
-                                    .background(BrushedGold)
-                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                                    .clip(Squircle12)
+                                    .background(SageGreenContainer)
+                                    .padding(horizontal = 9.dp, vertical = 4.dp)
                             ) {
-                                Text("MOST POPULAR", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = ObsidianBlack)
+                                Text(
+                                    text = "POPULAR MICRO-PASS",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SageGreenText
+                                )
                             }
                             Spacer(modifier = Modifier.weight(1f))
-                            Text("Just $currencySymbol 83 / month", fontSize = 11.sp, color = GoldGleam, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = "One-Time Unlock",
+                                fontSize = 11.sp,
+                                color = SlateMuted,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Annual Sovereign Pass", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                                Text("Complete unlock of all 6 Levels + Gemini AI Advisor", fontSize = 12.sp, color = TextSecondary)
+                                Text(
+                                    text = "Level 2 & 3 Pro Pass",
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SlateCharcoal
+                                )
+                                Text(
+                                    text = "Unlock 1% Risk Law, VWAP Breakouts & Order Blocks",
+                                    fontSize = 12.sp,
+                                    color = SlateMuted
+                                )
                             }
-                            Text("$currencySymbol 999", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = GoldGleam)
+                            Text(
+                                text = "$currencySymbol 129",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = TrustBlue
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(14.dp))
 
                         listOf(
-                            "Full access to Levels 1 through 6 (1602 to Modern Macro)",
-                            "Unlimited multi-turn Gemini 3.8 Flash AI Market Advisor",
-                            "Real-time Macroeconomic Radar & Indian Tax Slab Analysis",
-                            "Stock Compounding & Wealth Multiplier Simulators",
-                            "Save over 60% compared to buying individual levels"
+                            "Immediate unlock for Chapters 3, 4, 5 and 6",
+                            "Candlestick & Order Flow Imbalance drills",
+                            "Full Clearance Certificate to trade live markets",
+                            "Special ₹129 Launch pricing (regular ₹499)"
                         ).forEach { perk ->
-                            Row(modifier = Modifier.padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Icon(imageVector = Icons.Default.Check, contentDescription = null, tint = BrushedGold, modifier = Modifier.size(15.dp))
+                            Row(
+                                modifier = Modifier.padding(vertical = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = SageGreen,
+                                    modifier = Modifier.size(15.dp)
+                                )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(perk, fontSize = 12.sp, color = TextSecondary)
+                                Text(perk, fontSize = 12.sp, color = SlateDark)
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Micro-Tier Breakdown Note
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(CutCornerShape(10.dp))
-                        .background(Color(0xFF141419))
-                        .border(1.dp, MetallicGoldBorder.copy(alpha = 0.4f), CutCornerShape(10.dp))
-                        .padding(12.dp)
+                // Annual Sovereign Tier Card (₹999)
+                AppleGlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = Squircle20,
+                    backgroundColor = if (selectedTier == "ANNUAL") Color.White else Color(0xFFF8FAFC),
+                    borderColor = if (selectedTier == "ANNUAL") BrushedGold else CreamBorder,
+                    elevation = if (selectedTier == "ANNUAL") 4.dp else 1.dp,
+                    onClick = { selectedTier = "ANNUAL" }
                 ) {
-                    Column {
-                        Text("Or Learn Level-by-Level as You Grow:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = BrushedGold)
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "Annual All-Access Sovereign Pass",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SlateCharcoal
+                                )
+                            }
+                            Text(
+                                text = "Unlimited AI Mentor + Macro Radar + All Future Levels",
+                                fontSize = 11.sp,
+                                color = SlateMuted
+                            )
+                        }
                         Text(
-                            text = "Level 1: Free • Level 2: ₹125 • Level 3: ₹175 • Level 4: ₹200 • Level 5: ₹225 • Level 6: ₹250. Small progressive investments as you master each stage.",
-                            fontSize = 11.sp,
-                            color = TextTertiary,
-                            modifier = Modifier.padding(top = 2.dp)
+                            text = "$currencySymbol 999/yr",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SlateCharcoal
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Secret Admin / Access Code Section (No codes displayed publicly)
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, Color(0xFF2B2B38), CutCornerShape(14.dp)),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF121217)),
-                    shape = CutCornerShape(14.dp)
+                // Secret Access / Promo Code Section in Squircle
+                AppleGlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = Squircle20,
+                    backgroundColor = Color.White,
+                    borderColor = Color(0xFFE2E8F0),
+                    elevation = 2.dp
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(imageVector = Icons.Default.Key, contentDescription = null, tint = BrushedGold, modifier = Modifier.size(18.dp))
+                            Icon(
+                                imageVector = Icons.Default.Key,
+                                contentDescription = null,
+                                tint = TrustBlue,
+                                modifier = Modifier.size(17.dp)
+                            )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Have an Authorized Access Code?", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text(
+                                text = "Have an Authorized Access Code?",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = SlateCharcoal
+                            )
                         }
                         Text(
-                            text = "Enter your private authorization code to activate access.",
+                            text = "Enter your private VIP invite or student pass code.",
                             fontSize = 11.sp,
-                            color = TextTertiary,
+                            color = SlateMuted,
                             modifier = Modifier.padding(top = 2.dp, bottom = 10.dp)
                         )
 
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             OutlinedTextField(
                                 value = accessCodeInput,
                                 onValueChange = {
                                     accessCodeInput = it
                                     codeError = null
                                 },
-                                placeholder = { Text("Enter Access Code", fontSize = 12.sp) },
+                                placeholder = { Text("e.g. VIPFREE or TRADER", fontSize = 12.sp) },
                                 modifier = Modifier.weight(1f),
-                                shape = CutCornerShape(8.dp),
+                                shape = Squircle12,
                                 colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = BrushedGold,
-                                    unfocusedBorderColor = Color(0xFF383848),
-                                    focusedTextColor = TextPrimary,
-                                    unfocusedTextColor = TextPrimary
+                                    focusedBorderColor = TrustBlue,
+                                    unfocusedBorderColor = Color(0xFFCBD5E1),
+                                    focusedTextColor = SlateCharcoal,
+                                    unfocusedTextColor = SlateCharcoal
                                 ),
                                 singleLine = true
                             )
@@ -292,67 +398,104 @@ fun PaymentCheckoutModal(
                                         codeError = "Invalid or expired authorization code."
                                     }
                                 },
-                                shape = CutCornerShape(8.dp),
+                                shape = Squircle12,
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = BrushedGold,
-                                    contentColor = ObsidianBlack
+                                    containerColor = TrustBlue,
+                                    contentColor = Color.White
                                 )
                             ) {
-                                Icon(imageVector = Icons.Default.LockOpen, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
                                 Text("Apply", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
 
                         if (codeError != null) {
-                            Text(codeError!!, color = Color(0xFFEF4444), fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+                            Text(
+                                text = codeError!!,
+                                color = Color(0xFFEF4444),
+                                fontSize = 11.sp,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
                         }
                         if (codeSuccess) {
-                            Text("Access Code Verified. Annual Sovereign Pass Unlocked.", color = EmeraldProfit, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 4.dp))
+                            Text(
+                                text = "Code Verified: Sovereign Access Activated!",
+                                color = EmeraldProfit,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
                         }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Payment Gateways
-                Text("Select Payment Gateway", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                // Payment Gateway Selection
+                Text(
+                    text = "Select Payment Method",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = SlateCharcoal
+                )
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val paymentOptions = listOf(
                     Triple("UPI / Google Pay", Icons.Default.QrCode2, "Zero fees • Instant activation"),
                     Triple("Credit / Debit Card", Icons.Default.CreditCard, "Visa, MasterCard, RuPay, Amex"),
-                    Triple("NetBanking / Play Store", Icons.Default.AccountBalance, "All major national & international banks")
+                    Triple("NetBanking / Play Store", Icons.Default.AccountBalance, "All major Indian & global banks")
                 )
 
                 paymentOptions.forEach { (name, icon, subtitle) ->
                     val isSelected = selectedPaymentMethod == name
-                    Row(
+                    AppleGlassCard(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clip(CutCornerShape(10.dp))
-                            .background(if (isSelected) BrushedGold.copy(alpha = 0.15f) else CitadelCardElevated)
-                            .border(1.dp, if (isSelected) BrushedGold else Color(0xFF282834), CutCornerShape(10.dp))
-                            .clickable { selectedPaymentMethod = name }
-                            .padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(vertical = 3.dp),
+                        shape = Squircle16,
+                        backgroundColor = if (isSelected) TrustBlueContainer.copy(alpha = 0.6f) else Color.White,
+                        borderColor = if (isSelected) TrustBlue else CreamBorder,
+                        elevation = if (isSelected) 3.dp else 1.dp,
+                        onClick = { selectedPaymentMethod = name }
                     ) {
-                        Icon(imageVector = icon, contentDescription = null, tint = if (isSelected) BrushedGold else TextSecondary, modifier = Modifier.size(20.dp))
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
-                            Text(subtitle, fontSize = 11.sp, color = TextTertiary)
-                        }
-                        if (isSelected) {
-                            Icon(imageVector = Icons.Default.Check, contentDescription = null, tint = BrushedGold, modifier = Modifier.size(18.dp))
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = if (isSelected) TrustBlue else SlateMuted,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = name,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = SlateCharcoal
+                                )
+                                Text(
+                                    text = subtitle,
+                                    fontSize = 11.sp,
+                                    color = SlateMuted
+                                )
+                            }
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = TrustBlue,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Proceed Button
+                // Primary Unlock CTA Button with Spring Physics
                 Button(
                     onClick = {
                         onPayWithMethod(selectedPaymentMethod)
@@ -360,23 +503,38 @@ fun PaymentCheckoutModal(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
-                    shape = CutCornerShape(10.dp),
+                        .height(54.dp)
+                        .appleSpringPress(
+                            onClick = {
+                                onPayWithMethod(selectedPaymentMethod)
+                                onDismiss()
+                            }
+                        ),
+                    shape = Squircle20,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = BrushedGold,
-                        contentColor = ObsidianBlack
-                    )
+                        containerColor = TrustBlue,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                 ) {
-                    Icon(imageVector = Icons.Default.Security, contentDescription = null)
+                    Icon(
+                        imageVector = Icons.Default.Security,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Unlock Annual Pass for $currencySymbol 999", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = if (selectedTier == "MICRO_PRO") "Unlock Pro Pass for $currencySymbol 129" else "Unlock Annual Pass for $currencySymbol 999",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "Encrypted by 256-bit SSL • Cancel or manage subscription settings anytime.",
+                    text = "Encrypted by 256-bit SSL • 100% money-back guarantee if not satisfied.",
                     fontSize = 10.sp,
-                    color = TextTertiary,
+                    color = SlateSubtle,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )

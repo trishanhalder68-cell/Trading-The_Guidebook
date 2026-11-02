@@ -52,6 +52,11 @@ import com.example.ui.theme.SlateMuted
 import com.example.ui.theme.SlateSubtle
 import com.example.ui.theme.TrustBlue
 
+import com.example.ui.theme.Squircle12
+import com.example.ui.theme.Squircle16
+import com.example.ui.theme.Squircle20
+import com.example.ui.theme.Squircle24
+
 data class RoadmapStage(
     val stageNumber: Int,
     val title: String,
@@ -60,15 +65,17 @@ data class RoadmapStage(
     val icon: ImageVector,
     val nextActionText: String,
     val stepChecklist: List<String>,
-    val targetTab: String
+    val targetTab: String,
+    val tierLabel: String = "Free Core",
+    val isProTier: Boolean = false
 )
 
 val TRADER_ROADMAP_STAGES = listOf(
     RoadmapStage(
         stageNumber = 1,
-        title = "Money Foundations & Income Tracker",
+        title = "Money Foundations & Cashflow",
         subtitle = "Master Cashflow Velocity",
-        description = "Log your daily income and living expenses, calculate annual savings velocity, and build your primary investment capital vault.",
+        description = "Level 1: Core foundational track. Track daily income streams and burn rate to capitalize your primary trading account.",
         icon = Icons.Default.AccountBalance,
         nextActionText = "Open Money Vault",
         stepChecklist = listOf(
@@ -76,42 +83,48 @@ val TRADER_ROADMAP_STAGES = listOf(
             "Track living expenses & capital burn",
             "Monitor Net Savings Run-Rate"
         ),
-        targetTab = "home"
+        targetTab = "home",
+        tierLabel = "Level 1 • Free Track",
+        isProTier = false
     ),
     RoadmapStage(
         stageNumber = 2,
-        title = "Market Basics",
+        title = "Candlesticks & Market Mechanics",
         subtitle = "Historical & Structural Foundations",
-        description = "From the 1602 Amsterdam VOC stock exchange to equities, bonds, order books, and centralized vs. decentralized markets.",
+        description = "Level 2: Deep dive into order book liquidity, candlestick dynamics, centralized exchange architecture, and institutional mechanics.",
         icon = Icons.Default.MenuBook,
-        nextActionText = "Explore Market Basics",
+        nextActionText = "Explore Candlestick Basics",
         stepChecklist = listOf(
-            "1602 VOC to Modern Electronic Exchanges",
-            "Equities vs. Sovereign & Corporate Bonds",
-            "Centralized Order Books vs. DeFi DEXs",
-            "Demystified Institutional Terminology"
+            "1602 VOC to Modern Electronic Order Books",
+            "Equities vs. Sovereign Debt & Commodities",
+            "Centralized Order Books & Spread Mechanics",
+            "Institutional Smart Money Concepts (SMC)"
         ),
-        targetTab = "masterclass"
+        targetTab = "masterclass",
+        tierLabel = "Level 2 • Pro Pass ₹129",
+        isProTier = true
     ),
     RoadmapStage(
         stageNumber = 3,
-        title = "Analysis & Charts",
+        title = "Macro Analysis & Multipliers",
         subtitle = "Macro Radar & Wealth Multipliers",
-        description = "Analyze regional economic criteria (India INR ₹, RBI rates, inflation), live market sentiment, and compound wealth growth models.",
+        description = "Level 3: Regional economic criteria (India INR ₹, RBI repo rates, CPI inflation), institutional sentiment radar, and 15% CAGR wealth models.",
         icon = Icons.Default.TrendingUp,
         nextActionText = "Explore Analysis & Charts",
         stepChecklist = listOf(
             "Evaluate RBI repo rate, CPI inflation & tax slabs",
             "Simulate 15% CAGR Stock Wealth Multiplier",
-            "Review official stock market news & sentiment trends"
+            "Review official market sentiment trends"
         ),
-        targetTab = "analytics"
+        targetTab = "analytics",
+        tierLabel = "Level 3 • Pro Pass ₹129",
+        isProTier = true
     ),
     RoadmapStage(
         stageNumber = 4,
-        title = "Simulated Execution",
-        subtitle = "Paper Trading & AI Mentor",
-        description = "Deploy virtual ₹1,00,000 cash in simulated real-time equity execution with stop-loss orders and AI Mentor consultation.",
+        title = "Simulated Execution & AI Mentor",
+        subtitle = "Paper Trading & AI Strategy",
+        description = "Deploy virtual ₹1,00,000 cash in simulated real-time equity execution with stop-loss orders and AI Mentor posture consultation.",
         icon = Icons.Default.AutoGraph,
         nextActionText = "Launch Trading Simulator",
         stepChecklist = listOf(
@@ -119,14 +132,16 @@ val TRADER_ROADMAP_STAGES = listOf(
             "Set protective Stop-Loss & Take-Profit exits",
             "Consult Gemini AI Market Mentor on portfolio posture"
         ),
-        targetTab = "simulation"
+        targetTab = "simulation",
+        tierLabel = "Execution Sandbox",
+        isProTier = false
     )
 )
 
 /**
  * Apple HIG Clean Frosted Glass Roadmap Section.
- * Free of cluttered badges or side pills. Focused on generous whitespace,
- * elegant SF typography, and effortless clarity.
+ * Implements continuous squircle geometry, living spring physics,
+ * and high-end non-intrusive micro-transaction triggers for Level 2 & 3.
  */
 @Composable
 fun TraderPathRoadmapSection(
@@ -134,6 +149,7 @@ fun TraderPathRoadmapSection(
     completedStages: Set<Int>,
     onSelectStage: (RoadmapStage) -> Unit,
     onSkipToStage: (Int) -> Unit,
+    onOpenCheckout: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -164,12 +180,19 @@ fun TraderPathRoadmapSection(
             }
 
             // Clean subtle progress indicator
-            Text(
-                text = "Stage $currentStage of 4",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = SlateMuted
-            )
+            Box(
+                modifier = Modifier
+                    .clip(Squircle12)
+                    .background(CreamContainer)
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "Stage $currentStage of 4",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = SlateMuted
+                )
+            }
         }
 
         // Sequential Stage Cards
@@ -184,15 +207,15 @@ fun TraderPathRoadmapSection(
                 isActive = isActive,
                 isUnlocked = isUnlocked,
                 onClick = { onSelectStage(stage) },
-                onSkip = { onSkipToStage(stage.stageNumber) }
+                onSkip = { onSkipToStage(stage.stageNumber) },
+                onUpgrade = onOpenCheckout
             )
         }
     }
 }
 
 /**
- * Minimalist Apple Frosted Glass Card for Learning Stages.
- * Soft drop shadow, hairline border, clean SF typography, smooth flat buttons.
+ * Minimalist Apple Frosted Glass Card for Learning Stages with continuous squircle curvature.
  */
 @Composable
 fun AppleRoadmapStageCard(
@@ -202,12 +225,13 @@ fun AppleRoadmapStageCard(
     isUnlocked: Boolean,
     onClick: () -> Unit,
     onSkip: () -> Unit,
+    onUpgrade: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val cardBackground = if (isActive) {
-        Color.White.copy(alpha = 0.95f)
+        Color.White.copy(alpha = 0.96f)
     } else {
-        Color.White.copy(alpha = 0.80f)
+        Color.White.copy(alpha = 0.85f)
     }
 
     val cardBorder = if (isActive) {
@@ -221,13 +245,13 @@ fun AppleRoadmapStageCard(
             .fillMaxWidth()
             .shadow(
                 elevation = if (isActive) 6.dp else 2.dp,
-                shape = RoundedCornerShape(20.dp),
+                shape = Squircle24,
                 spotColor = Color(0x12000000),
                 ambientColor = Color(0x06000000)
             )
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Squircle24)
             .background(cardBackground)
-            .border(BorderStroke(1.dp, cardBorder), RoundedCornerShape(20.dp))
+            .border(BorderStroke(1.dp, cardBorder), Squircle24)
             .clickable(enabled = isUnlocked, onClick = onClick)
             .padding(20.dp)
     ) {
@@ -239,15 +263,15 @@ fun AppleRoadmapStageCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Minimalist Stage Circle
+                    // Minimalist Squircle Stage Badge
                     Box(
                         modifier = Modifier
-                            .size(34.dp)
-                            .clip(CircleShape)
+                            .size(36.dp)
+                            .clip(Squircle12)
                             .background(
                                 when {
                                     isCompleted -> SageGreenContainer
-                                    isActive -> TrustBlue.copy(alpha = 0.1f)
+                                    isActive -> TrustBlue.copy(alpha = 0.12f)
                                     else -> CreamContainer
                                 }
                             ),
@@ -258,7 +282,7 @@ fun AppleRoadmapStageCard(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = "Completed",
                                 tint = SageGreenText,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         } else {
                             Text(
@@ -273,13 +297,32 @@ fun AppleRoadmapStageCard(
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Column {
-                        Text(
-                            text = "STAGE ${stage.stageNumber}",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isActive) TrustBlue else SlateMuted,
-                            letterSpacing = 0.8.sp
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "STAGE ${stage.stageNumber}",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isActive) TrustBlue else SlateMuted,
+                                letterSpacing = 0.8.sp
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            // Tier indicator pill with continuous squircle
+                            Box(
+                                modifier = Modifier
+                                    .clip(Squircle12)
+                                    .background(
+                                        if (stage.isProTier) Color(0xFFFBF4E4) else SageGreenContainer
+                                    )
+                                    .padding(horizontal = 7.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = stage.tierLabel,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (stage.isProTier) Color(0xFF9E7715) else SageGreenText
+                                )
+                            }
+                        }
                         Text(
                             text = stage.title,
                             fontSize = 15.sp,
@@ -322,7 +365,7 @@ fun AppleRoadmapStageCard(
             // Clean, uncluttered checklist items
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
                 stage.stepChecklist.forEach { step ->
                     Row(
@@ -331,7 +374,7 @@ fun AppleRoadmapStageCard(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(4.dp)
+                                .size(5.dp)
                                 .clip(CircleShape)
                                 .background(if (isActive) TrustBlue else SlateSubtle)
                         )
@@ -345,9 +388,45 @@ fun AppleRoadmapStageCard(
                 }
             }
 
+            // High-End Freemium Micro-Transaction Upgrade Trigger for Level 2 & Level 3
+            if (stage.isProTier && !isCompleted) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(Squircle12)
+                        .background(Color(0xFFFBF4E4).copy(alpha = 0.8f))
+                        .border(BorderStroke(1.dp, Color(0xFFE6D3A3)), Squircle12)
+                        .clickable { onUpgrade() }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "⚡",
+                            fontSize = 13.sp
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Unlock Level ${stage.stageNumber} • ₹129 Micro-Pass",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF7A570C)
+                        )
+                    }
+                    Text(
+                        text = "Instant Access →",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF9E7715)
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Smooth Flat Action Button
+            // Smooth Flat Action Button with Squircle and Spring Physics
             if (isUnlocked) {
                 Button(
                     onClick = onClick,
@@ -355,11 +434,11 @@ fun AppleRoadmapStageCard(
                         containerColor = if (isActive) TrustBlue else CreamContainer,
                         contentColor = if (isActive) Color.White else SlateCharcoal
                     ),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = Squircle16,
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(42.dp)
+                        .height(44.dp)
                         .appleSpringPress(onClick = onClick)
                 ) {
                     Row(
@@ -383,10 +462,10 @@ fun AppleRoadmapStageCard(
                 OutlinedButton(
                     onClick = onSkip,
                     border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = Squircle16,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(40.dp)
+                        .height(42.dp)
                         .appleSpringPress(onClick = onSkip)
                 ) {
                     Text(

@@ -59,11 +59,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import com.example.ui.components.appleSpringPress
+import com.example.ui.theme.Squircle12
+import com.example.ui.theme.Squircle16
+import com.example.ui.theme.Squircle24
 import com.example.data.ai.configureAppCheck
 import com.example.ui.components.AddTransactionSheet
 import com.example.ui.components.MotivationalQuoteDialog
@@ -183,7 +188,7 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                     onClick = { showAddTransactionSheet = true },
                     containerColor = TrustBlue,
                     contentColor = Color.White,
-                    shape = CircleShape,
+                    shape = Squircle24,
                     modifier = Modifier
                         .size(56.dp)
                         .appleSpringPress(onClick = { showAddTransactionSheet = true })
@@ -202,7 +207,23 @@ fun MainAppScreen(viewModel: WealthViewModel) {
             AnimatedContent(
                 targetState = selectedTab,
                 transitionSpec = {
-                    fadeIn(tween(240)) togetherWith fadeOut(tween(180))
+                    (fadeIn(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy,
+                            stiffness = Spring.StiffnessMediumLow
+                        )
+                    ) + scaleIn(
+                        initialScale = 0.97f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy,
+                            stiffness = Spring.StiffnessMediumLow
+                        )
+                    )) togetherWith fadeOut(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioNoBouncy,
+                            stiffness = Spring.StiffnessMedium
+                        )
+                    )
                 },
                 label = "screen_transition"
             ) { tabIdx ->
@@ -232,17 +253,18 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(Squircle16)
                                 .background(CreamContainer)
-                                .border(BorderStroke(1.dp, CreamBorder), RoundedCornerShape(12.dp))
+                                .border(BorderStroke(1.dp, CreamBorder), Squircle16)
                                 .padding(4.dp)
                         ) {
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(Squircle12)
                                     .background(if (guidebookSubTab == 0) TrustBlue else Color.Transparent)
                                     .clickable { guidebookSubTab = 0 }
+                                    .appleSpringPress(onClick = { guidebookSubTab = 0 })
                                     .padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -266,9 +288,10 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(Squircle12)
                                     .background(if (guidebookSubTab == 1) TrustBlue else Color.Transparent)
                                     .clickable { guidebookSubTab = 1 }
+                                    .appleSpringPress(onClick = { guidebookSubTab = 1 })
                                     .padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -311,17 +334,18 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(Squircle16)
                                 .background(CreamContainer)
-                                .border(BorderStroke(1.dp, CreamBorder), RoundedCornerShape(12.dp))
+                                .border(BorderStroke(1.dp, CreamBorder), Squircle16)
                                 .padding(4.dp)
                         ) {
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(Squircle12)
                                     .background(if (analyticsSubTab == 0) TrustBlue else Color.Transparent)
                                     .clickable { analyticsSubTab = 0 }
+                                    .appleSpringPress(onClick = { analyticsSubTab = 0 })
                                     .padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -336,9 +360,10 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(Squircle12)
                                     .background(if (analyticsSubTab == 1) TrustBlue else Color.Transparent)
                                     .clickable { analyticsSubTab = 1 }
+                                    .appleSpringPress(onClick = { analyticsSubTab = 1 })
                                     .padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {

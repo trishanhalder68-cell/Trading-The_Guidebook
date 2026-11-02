@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -77,31 +76,37 @@ import com.example.ui.theme.SageGreenAccent
 import com.example.ui.theme.SlateCharcoal
 import com.example.ui.theme.SlateDark
 import com.example.ui.theme.SlateMuted
+import com.example.ui.theme.Squircle12
+import com.example.ui.theme.Squircle16
+import com.example.ui.theme.Squircle20
+import com.example.ui.theme.Squircle24
+import com.example.ui.theme.Squircle28
 import com.example.ui.theme.TrustBlue
 import com.example.ui.theme.TrustBlueHover
 import kotlinx.coroutines.launch
 
 /**
  * Apple Human Interface Guidelines: Spring-based Tactile Scale Feedback.
- * Provides an effortless, tactile physical response on press using iOS-like spring physics.
+ * Provides organic physical response using authentic spring parameters (mass, damping, stiffness).
+ * Accelerates smoothly, overshoots naturally, and settles without abrupt cuts.
  */
 fun Modifier.appleSpringPress(
-    targetScale: Float = 0.96f,
+    targetScale: Float = 0.965f,
     onClick: (() -> Unit)? = null
 ): Modifier = composed {
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
         targetValue = if (isPressed) targetScale else 1.0f,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
+            dampingRatio = Spring.DampingRatioMediumBouncy, // 0.75f - lively natural tactile overshoot
+            stiffness = Spring.StiffnessMediumLow          // 400f - fluid responsiveness
         ),
         label = "apple_spring_scale"
     )
 
     this
         .scale(scale)
-        .pointerInput(Unit) {
+        .pointerInput(onClick) {
             awaitPointerEventScope {
                 while (true) {
                     awaitFirstDown(requireUnconsumed = false)
@@ -117,27 +122,21 @@ fun Modifier.appleSpringPress(
 }
 
 /**
- * Modern Glassmorphism Card for Apple HIG Clean Luxury Aesthetic.
+ * Modern Glassmorphism Card for Apple HIG Clean Luxury Aesthetic with continuous Squircle geometry.
  * Features a frosted translucent surface, subtle specular gradient border, and soft diffused ambient shadow.
  */
 @Composable
 fun AppleGlassCard(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(22.dp),
-    backgroundColor: Color = Color.White.copy(alpha = 0.85f),
-    borderColor: Color = Color.White.copy(alpha = 0.95f),
-    elevation: Dp = 8.dp,
+    shape: Shape = Squircle24,
+    backgroundColor: Color = Color.White.copy(alpha = 0.92f),
+    borderColor: Color = Color(0xFFE2E8F0),
+    elevation: Dp = 6.dp,
     onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val clickableModifier = if (onClick != null) {
-        Modifier
-            .appleSpringPress(targetScale = 0.98f, onClick = onClick)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
-            )
+    val pressModifier = if (onClick != null) {
+        Modifier.appleSpringPress(targetScale = 0.985f, onClick = onClick)
     } else {
         Modifier
     }
@@ -147,15 +146,15 @@ fun AppleGlassCard(
             .shadow(
                 elevation = elevation,
                 shape = shape,
-                spotColor = Color(0x18000000),
-                ambientColor = Color(0x0A000000)
+                spotColor = Color(0x12000000),
+                ambientColor = Color(0x06000000)
             )
             .clip(shape)
             .background(
                 Brush.verticalGradient(
                     listOf(
                         backgroundColor,
-                        backgroundColor.copy(alpha = 0.92f)
+                        backgroundColor.copy(alpha = 0.94f)
                     )
                 )
             )
@@ -165,23 +164,23 @@ fun AppleGlassCard(
                     brush = Brush.linearGradient(
                         listOf(
                             borderColor,
-                            Color.White.copy(alpha = 0.4f),
-                            borderColor.copy(alpha = 0.7f)
+                            Color.White.copy(alpha = 0.6f),
+                            borderColor.copy(alpha = 0.85f)
                         )
                     )
                 ),
                 shape = shape
             )
-            .then(clickableModifier)
+            .then(pressModifier)
     ) {
         content()
     }
 }
 
 /**
- * High-Converting Citadel Lucrative Attention-Seeking Button.
- * Designed to visceral human psychology: pulsating aura, shimmering light sweep across metallic gold & trust blue,
- * real-time participant badge, and tactile spring responsiveness.
+ * High-Converting Citadel Lucrative Attention-Seeking Button with Squircle Radii.
+ * Designed to visceral human psychology: pulsating halo, shimmering light sweep,
+ * and tactile spring responsiveness.
  */
 @Composable
 fun LucrativeAttentionButton(
@@ -196,9 +195,9 @@ fun LucrativeAttentionButton(
     // Pulsating halo scale
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1.0f,
-        targetValue = 1.03f,
+        targetValue = 1.025f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1400, easing = FastOutSlowInEasing),
+            animation = tween(1500, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulse_scale"
@@ -209,7 +208,7 @@ fun LucrativeAttentionButton(
         initialValue = -300f,
         targetValue = 900f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2400, easing = LinearEasing),
+            animation = tween(2600, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "shimmer_sweep"
@@ -220,12 +219,12 @@ fun LucrativeAttentionButton(
             .fillMaxWidth()
             .scale(pulseScale)
             .shadow(
-                elevation = 16.dp,
-                shape = RoundedCornerShape(20.dp),
-                spotColor = BrushedGold.copy(alpha = 0.45f),
-                ambientColor = TrustBlue.copy(alpha = 0.2f)
+                elevation = 14.dp,
+                shape = Squircle24,
+                spotColor = BrushedGold.copy(alpha = 0.35f),
+                ambientColor = TrustBlue.copy(alpha = 0.15f)
             )
-            .clip(RoundedCornerShape(20.dp))
+            .clip(Squircle24)
             .background(
                 Brush.linearGradient(
                     colors = listOf(
@@ -247,9 +246,9 @@ fun LucrativeAttentionButton(
                         )
                     )
                 ),
-                RoundedCornerShape(20.dp)
+                Squircle24
             )
-            .appleSpringPress(targetScale = 0.95f, onClick = onClick)
+            .appleSpringPress(targetScale = 0.96f, onClick = onClick)
             .testTag("lucrative_masterclass_cta")
             .padding(18.dp)
     ) {
@@ -280,7 +279,6 @@ fun LucrativeAttentionButton(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Live active dot & badge
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
@@ -290,7 +288,7 @@ fun LucrativeAttentionButton(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "LIVE SESSION OPEN",
+                        text = "LIVE CURRICULUM ACTIVE",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = EmeraldProfit,
@@ -298,12 +296,11 @@ fun LucrativeAttentionButton(
                     )
                 }
 
-                // Asymmetry opportunity badge
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(Squircle12)
                         .background(BrushedGold.copy(alpha = 0.2f))
-                        .border(BorderStroke(1.dp, MetallicGoldBorder.copy(alpha = 0.6f)), RoundedCornerShape(12.dp))
+                        .border(BorderStroke(1.dp, MetallicGoldBorder.copy(alpha = 0.6f)), Squircle12)
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -335,7 +332,7 @@ fun LucrativeAttentionButton(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = title,
-                        fontSize = 19.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Black,
                         color = Color.White,
                         letterSpacing = 0.8.sp
@@ -351,11 +348,10 @@ fun LucrativeAttentionButton(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // Official Action Emblem
                 Box(
                     modifier = Modifier
                         .size(46.dp)
-                        .clip(CircleShape)
+                        .clip(Squircle16)
                         .background(
                             Brush.linearGradient(
                                 listOf(
@@ -364,7 +360,7 @@ fun LucrativeAttentionButton(
                                 )
                             )
                         )
-                        .border(BorderStroke(1.dp, GoldGleam), CircleShape),
+                        .border(BorderStroke(1.dp, GoldGleam), Squircle16),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

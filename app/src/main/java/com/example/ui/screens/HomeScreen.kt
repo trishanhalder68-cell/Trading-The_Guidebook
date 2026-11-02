@@ -2,9 +2,9 @@ package com.example.ui.screens
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -34,11 +34,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Forest
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.PlayArrow
@@ -70,9 +71,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -84,8 +83,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.TransactionEntity
 import com.example.data.model.TransactionType
-import com.example.ui.auth.GoogleSignInButton
+import com.example.ui.auth.CompactGoogleSignInChip
+import com.example.ui.components.AmbientLivingMeshBackground
 import com.example.ui.components.AppleGlassCard
+import com.example.ui.components.LearningFlowchartTree
 import com.example.ui.components.TraderPathRoadmapSection
 import com.example.ui.components.appleSpringPress
 import com.example.ui.theme.BrushedGold
@@ -107,6 +108,12 @@ import com.example.ui.theme.SlateCharcoal
 import com.example.ui.theme.SlateDark
 import com.example.ui.theme.SlateMuted
 import com.example.ui.theme.SlateSubtle
+import com.example.ui.theme.Squircle12
+import com.example.ui.theme.Squircle16
+import com.example.ui.theme.Squircle20
+import com.example.ui.theme.Squircle24
+import com.example.ui.theme.Squircle28
+import com.example.ui.theme.Squircle32
 import com.example.ui.theme.TrustBlue
 import com.example.ui.theme.TrustBlueContainer
 import com.example.ui.theme.TrustBlueHover
@@ -132,6 +139,7 @@ fun HomeScreen(
     val isVip by viewModel.isVipPro.collectAsState()
     val activeStage by viewModel.activeStage.collectAsState()
     val completedStages by viewModel.completedStages.collectAsState()
+    val completedLessons by viewModel.completedLessons.collectAsState()
 
     val currency = region.currencySymbol
     val currentUser = try {
@@ -140,53 +148,37 @@ fun HomeScreen(
         null
     }
 
-    // Live cycling button state: alternates seamlessly between "Start Learning" and "Start Income"
-    var liveMode by remember { mutableIntStateOf(0) } // 0: Start Learning, 1: Start Income
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(3600)
-            liveMode = (liveMode + 1) % 2
+    // 0: Learning Tree & Badges (Default focus), 1: Capital Vault (Income Calculator)
+    var homeTabState by remember { mutableIntStateOf(0) }
+
+    // Custom Focal Action Button: 0 = "Start Income", 1 = "Start Learning (Masterclass)"
+    var focalButtonMode by remember { mutableIntStateOf(0) }
+    var isAutoCycling by remember { mutableStateOf(true) }
+
+    // Calm 5-second alternating cycle between "Start Income" and "Start Learning" (saying "Masterclass")
+    LaunchedEffect(isAutoCycling) {
+        while (isAutoCycling) {
+            delay(5000L)
+            focalButtonMode = (focalButtonMode + 1) % 2
         }
     }
 
-    // Buttery smooth Windows 11 / Gemini style pop-up modal state
     var showSmoothLaunchModal by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(CreamBackground)
-    ) {
-        // Delicate subtle ambient aura in the upper center, mimicking Gemini app fluidity
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(380.dp)
-                .drawBehind {
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            colors = listOf(
-                                TrustBlue.copy(alpha = 0.05f),
-                                BrushedGold.copy(alpha = 0.03f),
-                                Color.Transparent
-                            ),
-                            center = Offset(size.width * 0.5f, size.height * 0.42f),
-                            radius = size.width * 0.65f
-                        )
-                    )
-                }
-        )
-
+    AmbientLivingMeshBackground {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item {
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Minimalist, high-end Apple HIG Top Bar
+                // =====================================================================
+                // MINIMALIST APPLE-HIG TOP BAR
+                // Clean left identity & sleek top-right corner sign-in + currency chips
+                // =====================================================================
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -198,57 +190,25 @@ fun HomeScreen(
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = TrustBlue,
-                            letterSpacing = 1.2.sp
+                            letterSpacing = 1.3.sp
                         )
                         Text(
                             text = "Apex Citadel",
-                            fontSize = 18.sp,
+                            fontSize = 19.sp,
                             fontWeight = FontWeight.Bold,
                             color = SlateCharcoal
                         )
                     }
 
-                    // Clean Region & Account Indicator
+                    // Top-right corner minimalist controls
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (currentUser != null) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(SageGreenContainer)
-                                    .border(BorderStroke(1.dp, SageGreen.copy(alpha = 0.3f)), RoundedCornerShape(20.dp))
-                                    .padding(horizontal = 10.dp, vertical = 5.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.CloudDone,
-                                        contentDescription = null,
-                                        tint = SageGreen,
-                                        modifier = Modifier.size(12.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = currentUser.displayName?.take(10) ?: "Synced",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = SageGreenText
-                                    )
-                                }
-                            }
-                        } else {
-                            GoogleSignInButton(
-                                onAuthSuccess = { },
-                                onAuthError = { }
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
+                        // Region indicator chip
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(20.dp))
+                                .clip(Squircle12)
                                 .background(Color.White)
-                                .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), RoundedCornerShape(20.dp))
-                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                                .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), Squircle12)
+                                .padding(horizontal = 9.dp, vertical = 5.dp)
                         ) {
                             Text(
                                 text = "${region.code} $currency",
@@ -257,347 +217,117 @@ fun HomeScreen(
                                 color = SlateDark
                             )
                         }
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        // Compact account avatar or minimalist sign-in chip in top-right
+                        if (currentUser != null) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(Squircle12)
+                                    .background(SageGreenContainer)
+                                    .border(BorderStroke(1.dp, SageGreen.copy(alpha = 0.35f)), Squircle12)
+                                    .padding(horizontal = 9.dp, vertical = 5.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.CloudDone,
+                                        contentDescription = null,
+                                        tint = SageGreen,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = currentUser.displayName?.take(8) ?: "Synced",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = SageGreenText
+                                    )
+                                }
+                            }
+                        } else {
+                            CompactGoogleSignInChip(
+                                onAuthSuccess = { },
+                                onAuthError = { }
+                            )
+                        }
                     }
                 }
             }
 
             // =========================================================================
-            // CENTER STAGE: FLUID GEMINI-STYLE "START NOW" HERO
-            // Pure distraction-free focus: Live cycling button in the immediate middle
+            // APPLE-HIG SQUIRCLE SEGMENTED TAB SWITCHER
+            // [ 🌳 Learning Tree & Badges ]    [ 💰 Capital Vault ]
+            // Gives immediate 1-tap access to the income calculator side tab
             // =========================================================================
             item {
-                Spacer(modifier = Modifier.height(12.dp))
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .shadow(
-                            elevation = 10.dp,
-                            shape = RoundedCornerShape(28.dp),
-                            spotColor = Color(0x14000000),
-                            ambientColor = Color(0x06000000)
-                        )
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(
-                                    Color.White.copy(alpha = 0.96f),
-                                    Color.White.copy(alpha = 0.90f)
-                                )
-                            )
-                        )
-                        .border(
-                            BorderStroke(1.dp, Color(0xFFE2E8F0)),
-                            RoundedCornerShape(28.dp)
-                        )
-                        .padding(26.dp),
-                    contentAlignment = Alignment.Center
+                        .clip(Squircle20)
+                        .background(Color.White.copy(alpha = 0.9f))
+                        .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), Squircle20)
+                        .padding(5.dp)
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // Subtle stage eyebrow
-                        Text(
-                            text = "IMMEDIATE SESSION",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TrustBlue,
-                            letterSpacing = 1.4.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        // Large fluid title focusing on immediate start
-                        Text(
-                            text = "Start Your Journey",
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = SlateCharcoal,
-                            textAlign = TextAlign.Center
-                        )
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Text(
-                            text = "From 1602 VOC to modern algorithmic execution. Distraction-free mastery.",
-                            fontSize = 13.sp,
-                            color = SlateMuted,
-                            textAlign = TextAlign.Center,
-                            lineHeight = 18.sp,
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        // =============================================================
-                        // THE LIVE DUAL-STATE BUTTON (Start Learning / Start Income)
-                        // Smoothly cycles with buttery crossfade, zero chunky animations
-                        // =============================================================
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        // Tab 0: Learning Tree
+                        val isTreeSelected = homeTabState == 0
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                                .shadow(
-                                    elevation = 8.dp,
-                                    shape = RoundedCornerShape(16.dp),
-                                    spotColor = TrustBlue.copy(alpha = 0.35f),
-                                    ambientColor = Color(0x0A000000)
-                                )
-                                .clip(RoundedCornerShape(16.dp))
+                                .weight(1f)
+                                .height(44.dp)
+                                .clip(Squircle16)
                                 .background(
-                                    Brush.horizontalGradient(
-                                        if (liveMode == 0) {
-                                            listOf(TrustBlue, TrustBlueHover)
-                                        } else {
-                                            listOf(SlateCharcoal, Color(0xFF1E293B))
-                                        }
-                                    )
+                                    if (isTreeSelected) TrustBlue else Color.Transparent
                                 )
-                                .appleSpringPress(onClick = { showSmoothLaunchModal = true })
-                                .testTag("live_hero_action_button"),
+                                .clickable { homeTabState = 0 }
+                                .appleSpringPress(onClick = { homeTabState = 0 }),
                             contentAlignment = Alignment.Center
-                        ) {
-                            AnimatedContent(
-                                targetState = liveMode,
-                                transitionSpec = {
-                                    fadeIn(tween(350, easing = LinearOutSlowInEasing)) togetherWith
-                                            fadeOut(tween(250, easing = FastOutLinearInEasing))
-                                },
-                                label = "live_button_transition"
-                            ) { mode ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center,
-                                    modifier = Modifier.padding(horizontal = 20.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = if (mode == 0) Icons.AutoMirrored.Filled.MenuBook else Icons.Default.AccountBalance,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(19.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(
-                                        text = if (mode == 0) "START LEARNING" else "START INCOME",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White,
-                                        letterSpacing = 1.sp
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = null,
-                                        tint = Color.White.copy(alpha = 0.8f),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        // Quick secondary trigger: direct open launch sheet
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable { showSmoothLaunchModal = true }
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = "Tap to explore full options",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = SlateMuted
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = null,
-                                tint = SlateMuted,
-                                modifier = Modifier.size(14.dp)
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Scroll down hint for deeper features
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Scroll down for Stage 1 Vault & Curriculum Roadmap",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = SlateSubtle
-                    )
-                }
-            }
-
-            // =========================================================================
-            // STAGE 1: MONEY FOUNDATIONS & CAPITAL VAULT
-            // Apple Frosted Glass Card with whitespace and tactile ledger
-            // =========================================================================
-            item {
-                AppleGlassCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
-                    backgroundColor = Color.White.copy(alpha = 0.95f),
-                    borderColor = Color(0xFFE2E8F0),
-                    elevation = 4.dp
-                ) {
-                    Column(modifier = Modifier.padding(22.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = "STAGE 1 • CAPITAL VAULT",
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TrustBlue,
-                                    letterSpacing = 1.sp
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = "Money Foundations",
-                                    fontSize = 19.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = SlateCharcoal
-                                )
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(SageGreenContainer)
-                                    .padding(horizontal = 10.dp, vertical = 5.dp)
-                            ) {
-                                Text(
-                                    text = "${summary.savingsRatePercentage.toInt()}% Saved",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = SageGreenText
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Large Net Savings Display
-                        Text(
-                            text = "Net Wealth Vault",
-                            fontSize = 12.sp,
-                            color = SlateMuted
-                        )
-                        Text(
-                            text = "$currency${"%,.2f".format(summary.netSavings)}",
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (summary.netSavings >= 0) SlateCharcoal else CrimsonLoss
-                        )
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        // Daily Inflow vs Burn row
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            // Income Pill
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(SageGreenContainer.copy(alpha = 0.5f))
-                                    .padding(12.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowUpward,
-                                        contentDescription = "Income",
-                                        tint = SageGreen,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Column {
-                                        Text(text = "Daily Inflow", fontSize = 10.sp, color = SageGreenText)
-                                        Text(
-                                            text = "$currency${"%,.0f".format(summary.dailyIncome)}",
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = SageGreenText
-                                        )
-                                    }
-                                }
-                            }
-
-                            // Expense Pill
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFFFEE2E2).copy(alpha = 0.5f))
-                                    .padding(12.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowDownward,
-                                        contentDescription = "Expense",
-                                        tint = CrimsonLoss,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Column {
-                                        Text(text = "Daily Burn", fontSize = 10.sp, color = CrimsonLoss)
-                                        Text(
-                                            text = "$currency${"%,.0f".format(summary.dailyExpense)}",
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = CrimsonLoss
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Smooth Flat Button: Log Cashflow
-                        Button(
-                            onClick = onOpenAddTransaction,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = TrustBlue,
-                                contentColor = Color.White
-                            ),
-                            shape = RoundedCornerShape(12.dp),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(46.dp)
-                                .appleSpringPress(onClick = onOpenAddTransaction)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    imageVector = Icons.Default.Add,
+                                    imageVector = Icons.Default.Forest,
                                     contentDescription = null,
+                                    tint = if (isTreeSelected) Color.White else SlateCharcoal,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "Log Cashflow Transaction",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    text = "Learning Tree",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isTreeSelected) Color.White else SlateCharcoal
+                                )
+                            }
+                        }
+
+                        // Tab 1: Capital Vault (Income Calculator side tab)
+                        val isVaultSelected = homeTabState == 1
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(44.dp)
+                                .clip(Squircle16)
+                                .background(
+                                    if (isVaultSelected) TrustBlue else Color.Transparent
+                                )
+                                .clickable { homeTabState = 1 }
+                                .appleSpringPress(onClick = { homeTabState = 1 }),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.AccountBalanceWallet,
+                                    contentDescription = null,
+                                    tint = if (isVaultSelected) Color.White else SlateCharcoal,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Capital Vault",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isVaultSelected) Color.White else SlateCharcoal
                                 )
                             }
                         }
@@ -606,205 +336,62 @@ fun HomeScreen(
             }
 
             // =========================================================================
-            // THE TRADER'S PATH: 4-STAGE SEQUENTIAL ROADMAP
-            // Ultra-clean Apple HIG cards without cluttered badges or side pills
+            // MAIN VIEW AREA: SWITCHES SEAMLESSLY WITH SPRING PHYSICS
             // =========================================================================
-            item {
-                TraderPathRoadmapSection(
-                    currentStage = activeStage,
-                    completedStages = completedStages,
-                    onSelectStage = { stage ->
-                        viewModel.selectRoadmapStage(stage.stageNumber)
-                        onNavigateToStage(stage.targetTab)
-                    },
-                    onSkipToStage = { stageNum ->
-                        viewModel.selectRoadmapStage(stageNum)
-                        val target = when (stageNum) {
-                            1 -> "home"
-                            2 -> "masterclass"
-                            3 -> "analytics"
-                            4 -> "simulation"
-                            else -> "home"
-                        }
-                        onNavigateToStage(target)
-                    }
-                )
-            }
-
-            // =========================================================================
-            // RECENT CASHFLOW TRANSACTIONS
-            // =========================================================================
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Cashflow History (${transactions.size})",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = SlateCharcoal
-                    )
-                    Text(
-                        text = "Stage 1 Activity",
-                        fontSize = 12.sp,
-                        color = SlateMuted
+            if (homeTabState == 0) {
+                // =====================================================================
+                // TAB 0: INTERACTIVE LEARNING FLOWCHART TREE & BADGES
+                // =====================================================================
+                item {
+                    LearningFlowchartTree(
+                        completedLessonIds = completedLessons,
+                        onCompleteLesson = { lessonId ->
+                            viewModel.completeLesson(lessonId)
+                        },
+                        onNavigateToMasterclassChapter = { chapterId ->
+                            onNavigateToStage("masterclass")
+                        },
+                        onOpenUpgradeModal = onOpenCheckout
                     )
                 }
-            }
 
-            if (transactions.isEmpty()) {
+                // =====================================================================
+                // HIGH-END FOCAL CUSTOM ACTION BUTTON
+                // Alternates smoothly between "Start Income" and "Start Learning" (Masterclass)
+                // Kept in sharp Apple-HIG focus with ambient halo, tactile springs, and focus lock
+                // =====================================================================
                 item {
+                    val infiniteTransition = rememberInfiniteTransition(label = "focusPulse")
+                    val pulseGlow by infiniteTransition.animateFloat(
+                        initialValue = 0.28f,
+                        targetValue = 0.75f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(2200, easing = FastOutSlowInEasing),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "pulseGlow"
+                    )
+
                     AppleGlassCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        backgroundColor = Color.White.copy(alpha = 0.85f),
-                        borderColor = Color(0xFFE2E8F0),
-                        elevation = 2.dp
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("focal_action_panel"),
+                        shape = Squircle28,
+                        backgroundColor = Color.White.copy(alpha = 0.96f),
+                        borderColor = if (focalButtonMode == 0) {
+                            GoldDark.copy(alpha = pulseGlow * 0.75f)
+                        } else {
+                            TrustBlue.copy(alpha = pulseGlow)
+                        },
+                        elevation = 8.dp
                     ) {
                         Column(
-                            modifier = Modifier.padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Savings,
-                                contentDescription = null,
-                                tint = SlateSubtle,
-                                modifier = Modifier.size(32.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Your Capital Vault is Ready",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                color = SlateCharcoal
-                            )
-                            Text(
-                                text = "Log your first income or expense to activate Stage 1.",
-                                fontSize = 12.sp,
-                                color = SlateMuted
-                            )
-                        }
-                    }
-                }
-            } else {
-                items(transactions.take(5)) { tx ->
-                    AppleGlassCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        backgroundColor = Color.White.copy(alpha = 0.9f),
-                        borderColor = Color(0xFFE2E8F0),
-                        elevation = 1.dp
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(14.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(34.dp)
-                                        .clip(CircleShape)
-                                        .background(
-                                            if (tx.type == TransactionType.INCOME) SageGreenContainer else Color(0xFFFEE2E2)
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = if (tx.type == TransactionType.INCOME) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                                        contentDescription = tx.type.name,
-                                        tint = if (tx.type == TransactionType.INCOME) SageGreen else CrimsonLoss,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        text = tx.title,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = SlateCharcoal
-                                    )
-                                    Text(
-                                        text = "${tx.category} • ${SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(tx.timestamp))}",
-                                        fontSize = 11.sp,
-                                        color = SlateMuted
-                                    )
-                                }
-                            }
-
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "${if (tx.type == TransactionType.INCOME) "+" else "-"}$currency${"%,.2f".format(tx.amount)}",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (tx.type == TransactionType.INCOME) SageGreenAccent else CrimsonLoss
-                                )
-                                IconButton(
-                                    onClick = { viewModel.deleteTransaction(tx) },
-                                    modifier = Modifier.appleSpringPress()
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Delete",
-                                        tint = SlateSubtle,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(30.dp))
-            }
-        }
-
-        // =============================================================================
-        // BUTTERY SMOOTH MAIN POP-UP (Windows 11 / Gemini Style Fluidity)
-        // Light, feathery elevation, gentle fade & vertical glide, zero harsh zoom
-        // =============================================================================
-        if (showSmoothLaunchModal) {
-            Dialog(
-                onDismissRequest = { showSmoothLaunchModal = false },
-                properties = DialogProperties(usePlatformDefaultWidth = false)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.35f))
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = { showSmoothLaunchModal = false }
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.92f)
-                            .shadow(
-                                elevation = 16.dp,
-                                shape = RoundedCornerShape(28.dp),
-                                spotColor = Color(0x24000000),
-                                ambientColor = Color(0x0E000000)
-                            )
-                            .clip(RoundedCornerShape(28.dp))
-                            .background(Color(0xFFFAF9F6))
-                            .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), RoundedCornerShape(28.dp))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = { /* consume click inside card */ }
-                            )
-                            .padding(24.dp)
-                    ) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            // Top Row: Dismiss & Title
+                            // Header with living Focus Status & Mode Pill Switcher
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -815,243 +402,651 @@ fun HomeScreen(
                                         modifier = Modifier
                                             .size(8.dp)
                                             .clip(CircleShape)
-                                            .background(EmeraldProfit)
+                                            .background(
+                                                if (focalButtonMode == 0) GoldDark else TrustBlue
+                                            )
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "SESSION LAUNCHPAD",
+                                        text = "FOCUS ACTION",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = TrustBlue,
-                                        letterSpacing = 1.sp
+                                        color = if (focalButtonMode == 0) GoldDark else TrustBlue,
+                                        letterSpacing = 1.3.sp
                                     )
                                 }
 
-                                IconButton(
-                                    onClick = { showSmoothLaunchModal = false },
-                                    modifier = Modifier.size(28.dp)
+                                // Interactive Focus Chips: Tap to explicitly focus either mode
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Close",
-                                        tint = SlateMuted,
-                                        modifier = Modifier.size(18.dp)
-                                    )
+                                    // Focus Pill: Start Income
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(Squircle12)
+                                            .background(
+                                                if (focalButtonMode == 0) GoldGleam else Color(0xFFF1F5F9)
+                                            )
+                                            .clickable {
+                                                focalButtonMode = 0
+                                                isAutoCycling = false
+                                            }
+                                            .padding(horizontal = 9.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = "Start Income",
+                                            fontSize = 11.sp,
+                                            fontWeight = if (focalButtonMode == 0) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (focalButtonMode == 0) ObsidianBlack else SlateMuted
+                                        )
+                                    }
+
+                                    // Focus Pill: Masterclass
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(Squircle12)
+                                            .background(
+                                                if (focalButtonMode == 1) TrustBlueContainer else Color(0xFFF1F5F9)
+                                            )
+                                            .clickable {
+                                                focalButtonMode = 1
+                                                isAutoCycling = false
+                                            }
+                                            .padding(horizontal = 9.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = "Masterclass",
+                                            fontSize = 11.sp,
+                                            fontWeight = if (focalButtonMode == 1) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (focalButtonMode == 1) TrustBlue else SlateMuted
+                                        )
+                                    }
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(14.dp))
 
-                            Text(
-                                text = "What would you like to launch?",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = SlateCharcoal
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Choose your active focus. Seamlessly navigate directly to the core lesson.",
-                                fontSize = 12.sp,
-                                color = SlateMuted,
-                                lineHeight = 16.sp
-                            )
-
-                            Spacer(modifier = Modifier.height(20.dp))
-
-                            // Choice 1: Start Learning (Masterclass)
+                            // =========================================================
+                            // THE CUSTOM BUTTON (Once says "Start Income", then says "Start Learning (Masterclass)")
+                            // Rendered as the prime hero focal element with rich continuous squircle geometry
+                            // =========================================================
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color.White)
-                                    .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), RoundedCornerShape(16.dp))
-                                    .clickable {
-                                        showSmoothLaunchModal = false
-                                        viewModel.selectRoadmapStage(2)
-                                        onNavigateToStage("masterclass")
-                                    }
-                                    .appleSpringPress(onClick = {
-                                        showSmoothLaunchModal = false
-                                        viewModel.selectRoadmapStage(2)
-                                        onNavigateToStage("masterclass")
-                                    })
-                                    .padding(16.dp)
+                                    .shadow(
+                                        elevation = 10.dp,
+                                        shape = Squircle24,
+                                        spotColor = if (focalButtonMode == 0) {
+                                            GoldDark.copy(alpha = 0.4f)
+                                        } else {
+                                            TrustBlue.copy(alpha = 0.45f)
+                                        }
+                                    )
+                                    .clip(Squircle24)
+                                    .background(
+                                        if (focalButtonMode == 0) {
+                                            Brush.horizontalGradient(
+                                                listOf(
+                                                    Color(0xFF0F172A),
+                                                    Color(0xFF1E293B),
+                                                    Color(0xFF0F172A)
+                                                )
+                                            )
+                                        } else {
+                                            Brush.horizontalGradient(
+                                                listOf(
+                                                    TrustBlue,
+                                                    TrustBlueHover,
+                                                    Color(0xFF0369A1)
+                                                )
+                                            )
+                                        }
+                                    )
+                                    .border(
+                                        BorderStroke(
+                                            1.5.dp,
+                                            if (focalButtonMode == 0) {
+                                                GoldGleam.copy(alpha = 0.85f)
+                                            } else {
+                                                Color.White.copy(alpha = 0.45f)
+                                            }
+                                        ),
+                                        Squircle24
+                                    )
+                                    .appleSpringPress(
+                                        onClick = {
+                                            if (focalButtonMode == 0) {
+                                                onOpenAddTransaction()
+                                            } else {
+                                                onNavigateToStage("masterclass")
+                                            }
+                                        }
+                                    )
+                                    .testTag(
+                                        if (focalButtonMode == 0) "start_income_button" else "start_masterclass_button"
+                                    )
+                                    .padding(vertical = 18.dp, horizontal = 20.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(40.dp)
-                                                .clip(CircleShape)
-                                                .background(TrustBlue.copy(alpha = 0.1f)),
-                                            contentAlignment = Alignment.Center
+                                AnimatedContent(
+                                    targetState = focalButtonMode,
+                                    transitionSpec = {
+                                        (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) +
+                                            slideInVertically(
+                                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                                initialOffsetY = { it / 2 }
+                                            )) togetherWith
+                                            (fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) +
+                                                slideOutVertically(
+                                                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                                    targetOffsetY = { -it / 2 }
+                                                ))
+                                    },
+                                    label = "customFocalButtonContent"
+                                ) { mode ->
+                                    if (mode == 0) {
+                                        // STATE A: "START INCOME"
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(46.dp)
+                                                        .clip(Squircle16)
+                                                        .background(GoldDark.copy(alpha = 0.25f))
+                                                        .border(BorderStroke(1.dp, GoldGleam.copy(alpha = 0.5f)), Squircle16),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.AccountBalanceWallet,
+                                                        contentDescription = null,
+                                                        tint = GoldGleam,
+                                                        modifier = Modifier.size(24.dp)
+                                                    )
+                                                }
+
+                                                Spacer(modifier = Modifier.width(14.dp))
+
+                                                Column {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text(
+                                                            text = "START INCOME",
+                                                            fontSize = 17.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = Color.White,
+                                                            letterSpacing = 0.8.sp
+                                                        )
+                                                        Spacer(modifier = Modifier.width(6.dp))
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .clip(Squircle12)
+                                                                .background(GoldGleam)
+                                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                        ) {
+                                                            Text(
+                                                                text = "CASHFLOW",
+                                                                fontSize = 9.sp,
+                                                                fontWeight = FontWeight.Black,
+                                                                color = ObsidianBlack
+                                                            )
+                                                        }
+                                                    }
+                                                    Spacer(modifier = Modifier.height(2.dp))
+                                                    Text(
+                                                        text = "Log deposits, compound savings & seed trading capital",
+                                                        fontSize = 11.sp,
+                                                        color = Color(0xFFCBD5E1),
+                                                        maxLines = 1
+                                                    )
+                                                }
+                                            }
+
                                             Icon(
-                                                imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                                 contentDescription = null,
-                                                tint = TrustBlue,
+                                                tint = GoldGleam,
                                                 modifier = Modifier.size(20.dp)
                                             )
                                         }
-                                        Spacer(modifier = Modifier.width(14.dp))
-                                        Column {
-                                            Text(
-                                                text = "Start Learning",
-                                                fontSize = 15.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = SlateCharcoal
-                                            )
-                                            Text(
-                                                text = "1602 VOC to Global Markets (Free Chapter 1)",
-                                                fontSize = 11.sp,
-                                                color = SlateMuted
+                                    } else {
+                                        // STATE B: "START LEARNING" (saying "Masterclass")
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(46.dp)
+                                                        .clip(Squircle16)
+                                                        .background(Color.White.copy(alpha = 0.2f))
+                                                        .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)), Squircle16),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                                                        contentDescription = null,
+                                                        tint = Color.White,
+                                                        modifier = Modifier.size(24.dp)
+                                                    )
+                                                }
+
+                                                Spacer(modifier = Modifier.width(14.dp))
+
+                                                Column {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text(
+                                                            text = "START LEARNING",
+                                                            fontSize = 17.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = Color.White,
+                                                            letterSpacing = 0.8.sp
+                                                        )
+                                                        Spacer(modifier = Modifier.width(6.dp))
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .clip(Squircle12)
+                                                                .background(Color.White)
+                                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                        ) {
+                                                            Text(
+                                                                text = "MASTERCLASS",
+                                                                fontSize = 9.sp,
+                                                                fontWeight = FontWeight.Black,
+                                                                color = TrustBlue
+                                                            )
+                                                        }
+                                                    }
+                                                    Spacer(modifier = Modifier.height(2.dp))
+                                                    Text(
+                                                        text = "Masterclass • 6 Pillars • Candlesticks & Liquidity",
+                                                        fontSize = 11.sp,
+                                                        color = Color.White.copy(alpha = 0.88f),
+                                                        maxLines = 1
+                                                    )
+                                                }
+                                            }
+
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                                contentDescription = null,
+                                                tint = Color.White,
+                                                modifier = Modifier.size(20.dp)
                                             )
                                         }
                                     }
-
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = null,
-                                        tint = TrustBlue,
-                                        modifier = Modifier.size(16.dp)
-                                    )
                                 }
                             }
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            // Choice 2: Start Income (Money Foundations)
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color.White)
-                                    .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), RoundedCornerShape(16.dp))
-                                    .clickable {
-                                        showSmoothLaunchModal = false
-                                        onOpenAddTransaction()
-                                    }
-                                    .appleSpringPress(onClick = {
-                                        showSmoothLaunchModal = false
-                                        onOpenAddTransaction()
-                                    })
-                                    .padding(16.dp)
+                            // Focus Status & Cycling Indicator Dots
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(40.dp)
-                                                .clip(CircleShape)
-                                                .background(SageGreenContainer),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.AccountBalance,
-                                                contentDescription = null,
-                                                tint = SageGreenText,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                        Spacer(modifier = Modifier.width(14.dp))
-                                        Column {
-                                            Text(
-                                                text = "Start Income Tracker",
-                                                fontSize = 15.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = SlateCharcoal
-                                            )
-                                            Text(
-                                                text = "Log Inflow & Build Compounding Vault",
-                                                fontSize = 11.sp,
-                                                color = SlateMuted
-                                            )
-                                        }
-                                    }
+                                Text(
+                                    text = if (isAutoCycling) {
+                                        if (focalButtonMode == 0) "• In Focus: Capital Generation Desk" else "• In Focus: Institutional Masterclass"
+                                    } else {
+                                        if (focalButtonMode == 0) "• Focused on Income Logging (Manual)" else "• Focused on Masterclass (Manual)"
+                                    },
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = SlateMuted
+                                )
 
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = null,
-                                        tint = SageGreen,
-                                        modifier = Modifier.size(16.dp)
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(width = if (focalButtonMode == 0) 18.dp else 6.dp, height = 6.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                if (focalButtonMode == 0) GoldDark else Color(0xFFCBD5E1)
+                                            )
                                     )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            // Choice 3: Consult AI Mentor
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color.White)
-                                    .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), RoundedCornerShape(16.dp))
-                                    .clickable {
-                                        showSmoothLaunchModal = false
-                                        onNavigateToStage("mentor")
-                                    }
-                                    .appleSpringPress(onClick = {
-                                        showSmoothLaunchModal = false
-                                        onNavigateToStage("mentor")
-                                    })
-                                    .padding(16.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(40.dp)
-                                                .clip(CircleShape)
-                                                .background(Color(0xFFEDE9FE)),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.SmartToy,
-                                                contentDescription = null,
-                                                tint = Color(0xFF7C3AED),
-                                                modifier = Modifier.size(20.dp)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(width = if (focalButtonMode == 1) 18.dp else 6.dp, height = 6.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                if (focalButtonMode == 1) TrustBlue else Color(0xFFCBD5E1)
                                             )
-                                        }
-                                        Spacer(modifier = Modifier.width(14.dp))
-                                        Column {
-                                            Text(
-                                                text = "Consult AI Wealth Advisor",
-                                                fontSize = 15.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = SlateCharcoal
-                                            )
-                                            Text(
-                                                text = "Ask questions on market terms & strategy",
-                                                fontSize = 11.sp,
-                                                color = SlateMuted
-                                            )
-                                        }
-                                    }
-
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = null,
-                                        tint = Color(0xFF7C3AED),
-                                        modifier = Modifier.size(16.dp)
                                     )
                                 }
                             }
                         }
                     }
                 }
+
+                // 4-Stage Sequential Roadmap Section
+                item {
+                    TraderPathRoadmapSection(
+                        currentStage = activeStage,
+                        completedStages = completedStages,
+                        onSelectStage = { stage ->
+                            viewModel.selectRoadmapStage(stage.stageNumber)
+                            onNavigateToStage(stage.targetTab)
+                        },
+                        onSkipToStage = { stageNum ->
+                            viewModel.selectRoadmapStage(stageNum)
+                            val target = when (stageNum) {
+                                1 -> "home"
+                                2 -> "masterclass"
+                                3 -> "analytics"
+                                4 -> "simulation"
+                                else -> "home"
+                            }
+                            onNavigateToStage(target)
+                        },
+                        onOpenCheckout = onOpenCheckout
+                    )
+                }
+            } else {
+                // =====================================================================
+                // TAB 1: CAPITAL VAULT & INCOME TRACKER SIDE TAB
+                // (Relocated as requested: accessible cleanly with a single tap)
+                // =====================================================================
+                item {
+                    AppleGlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = Squircle28,
+                        backgroundColor = Color.White.copy(alpha = 0.95f),
+                        borderColor = Color(0xFFE2E8F0),
+                        elevation = 6.dp
+                    ) {
+                        Column(modifier = Modifier.padding(22.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "STAGE 1 • CAPITAL VAULT",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TrustBlue,
+                                        letterSpacing = 1.2.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Money Foundations & Run-Rate",
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = SlateCharcoal
+                                    )
+                                }
+
+                                Box(
+                                    modifier = Modifier
+                                        .clip(Squircle12)
+                                        .background(SageGreenContainer)
+                                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                                ) {
+                                    Text(
+                                        text = "${summary.savingsRatePercentage.toInt()}% Saved",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = SageGreenText
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Text(
+                                text = "Net Wealth Vault",
+                                fontSize = 12.sp,
+                                color = SlateMuted
+                            )
+                            Text(
+                                text = "$currency${"%,.2f".format(summary.netSavings)}",
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (summary.netSavings >= 0) SlateCharcoal else CrimsonLoss
+                            )
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            // Daily Inflow vs Burn
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(Squircle16)
+                                        .background(SageGreenContainer.copy(alpha = 0.5f))
+                                        .padding(12.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowUpward,
+                                            contentDescription = "Income",
+                                            tint = SageGreen,
+                                            modifier = Modifier.size(15.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Column {
+                                            Text(text = "Daily Inflow", fontSize = 10.sp, color = SageGreenText)
+                                            Text(
+                                                text = "$currency${"%,.0f".format(summary.dailyIncome)}",
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = SageGreenText
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(Squircle16)
+                                        .background(Color(0xFFFEE2E2).copy(alpha = 0.5f))
+                                        .padding(12.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowDownward,
+                                            contentDescription = "Expense",
+                                            tint = CrimsonLoss,
+                                            modifier = Modifier.size(15.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Column {
+                                            Text(text = "Daily Burn", fontSize = 10.sp, color = CrimsonLoss)
+                                            Text(
+                                                text = "$currency${"%,.0f".format(summary.dailyExpense)}",
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = CrimsonLoss
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Log Cashflow Button with Squircle and Spring Physics
+                            Button(
+                                onClick = onOpenAddTransaction,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = TrustBlue,
+                                    contentColor = Color.White
+                                ),
+                                shape = Squircle16,
+                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp)
+                                    .appleSpringPress(onClick = onOpenAddTransaction)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "Log Cashflow Transaction",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Recent Cashflow Transactions header
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Cashflow History (${transactions.size})",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SlateCharcoal
+                        )
+                        Text(
+                            text = "Ledger Records",
+                            fontSize = 12.sp,
+                            color = SlateMuted
+                        )
+                    }
+                }
+
+                if (transactions.isEmpty()) {
+                    item {
+                        AppleGlassCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = Squircle20,
+                            backgroundColor = Color.White.copy(alpha = 0.9f),
+                            borderColor = Color(0xFFE2E8F0),
+                            elevation = 2.dp
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Savings,
+                                    contentDescription = null,
+                                    tint = SlateSubtle,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Your Capital Vault is Ready",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = SlateCharcoal
+                                )
+                                Text(
+                                    text = "Log your first income or expense to activate Stage 1.",
+                                    fontSize = 12.sp,
+                                    color = SlateMuted
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    items(transactions.take(8)) { tx ->
+                        AppleGlassCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = Squircle16,
+                            backgroundColor = Color.White.copy(alpha = 0.92f),
+                            borderColor = Color(0xFFE2E8F0),
+                            elevation = 1.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(14.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clip(Squircle12)
+                                            .background(
+                                                if (tx.type == TransactionType.INCOME) SageGreenContainer else Color(0xFFFEE2E2)
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = if (tx.type == TransactionType.INCOME) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                                            contentDescription = tx.type.name,
+                                            tint = if (tx.type == TransactionType.INCOME) SageGreen else CrimsonLoss,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            text = tx.title,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = SlateCharcoal
+                                        )
+                                        Text(
+                                            text = "${tx.category} • ${SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(tx.timestamp))}",
+                                            fontSize = 11.sp,
+                                            color = SlateMuted
+                                        )
+                                    }
+                                }
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "${if (tx.type == TransactionType.INCOME) "+" else "-"}$currency${"%,.2f".format(tx.amount)}",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (tx.type == TransactionType.INCOME) SageGreenAccent else CrimsonLoss
+                                    )
+                                    IconButton(
+                                        onClick = { viewModel.deleteTransaction(tx) },
+                                        modifier = Modifier.appleSpringPress()
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Delete",
+                                            tint = SlateSubtle,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(30.dp))
             }
         }
     }

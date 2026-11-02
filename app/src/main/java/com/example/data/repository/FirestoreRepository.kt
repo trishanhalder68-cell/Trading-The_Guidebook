@@ -22,16 +22,8 @@ class FirestoreRepository(
     constructor(context: Context) : this(
         try {
             val dbIdRes = context.resources.getIdentifier("firestore_database_id", "string", context.packageName)
-            val dbId = if (dbIdRes != 0) context.getString(dbIdRes) else ""
-            if (dbId.isNotBlank()) {
-                try {
-                    FirebaseFirestore.getInstance(dbId)
-                } catch (_: Throwable) {
-                    FirebaseFirestore.getInstance()
-                }
-            } else {
-                FirebaseFirestore.getInstance()
-            }
+            val dbId = if (dbIdRes != 0) context.getString(dbIdRes) else context.getString(R.string.firestore_database_id)
+            FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), dbId)
         } catch (e: Throwable) {
             android.util.Log.w("FirestoreRepository", "Firestore not available, local offline mode active", e)
             null

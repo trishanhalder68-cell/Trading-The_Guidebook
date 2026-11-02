@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-    <string name="firestore_database_id" translatable="false">ai-studio-android-tradingt-1b27f63a-608c-4a7a-90f1-157b782925ec</string>
+    <string name="firestore_database_id" translatable="false">ai-studio-android-tradingt-6f7d5c89-1b97-40bd-bd68-55aae62b8694</string>
     <string name="recaptcha_site_key" translatable="false">6LfnbQguAAAAAN3d6mXAFQ9BmZF-_V8vDioCdLwm</string>
 </resources>
