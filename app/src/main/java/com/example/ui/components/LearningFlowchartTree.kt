@@ -77,6 +77,10 @@ import com.example.ui.theme.Squircle24
 import com.example.ui.theme.Squircle28
 import com.example.ui.theme.TrustBlue
 import com.example.ui.theme.TrustBlueContainer
+import com.example.ui.theme.WarmBeigeBorder
+import com.example.ui.theme.WarmBeigeCard
+import com.example.ui.theme.WarmBeigeContainer
+import com.example.ui.theme.WarmBeigeSurface
 
 data class TreeLessonNode(
     val id: String,
@@ -196,8 +200,8 @@ fun LearningFlowchartTree(
         AppleGlassCard(
             modifier = Modifier.fillMaxWidth(),
             shape = Squircle28,
-            backgroundColor = Color.White.copy(alpha = 0.95f),
-            borderColor = if (isBattleReady) EmeraldProfit.copy(alpha = 0.4f) else Color(0xFFE2E8F0),
+            backgroundColor = WarmBeigeCard.copy(alpha = 0.96f),
+            borderColor = if (isBattleReady) EmeraldProfit.copy(alpha = 0.4f) else WarmBeigeBorder,
             elevation = 6.dp
         ) {
             Column(modifier = Modifier.padding(22.dp)) {
@@ -411,7 +415,7 @@ fun LearningFlowchartTree(
                     targetValue = when {
                         isCompleted -> EmeraldProfit.copy(alpha = 0.65f)
                         isNextUp -> TrustBlue
-                        else -> Color(0xFFE2E8F0)
+                        else -> WarmBeigeBorder
                     },
                     animationSpec = spring(stiffness = Spring.StiffnessLow),
                     label = "node_border"
@@ -431,15 +435,15 @@ fun LearningFlowchartTree(
                             if (isCompleted) {
                                 Brush.verticalGradient(
                                     listOf(
-                                        Color.White,
+                                        WarmBeigeCard,
                                         SageGreenContainer.copy(alpha = 0.35f)
                                     )
                                 )
                             } else {
                                 Brush.verticalGradient(
                                     listOf(
-                                        Color.White,
-                                        Color(0xFFFAFAFC)
+                                        WarmBeigeCard,
+                                        WarmBeigeContainer.copy(alpha = 0.4f)
                                     )
                                 )
                             }

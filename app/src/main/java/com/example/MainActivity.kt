@@ -118,9 +118,8 @@ class MainActivity : ComponentActivity() {
 
 enum class NavigationTab(val label: String, val icon: ImageVector) {
     HOME("The Path", Icons.Default.AccountBalanceWallet),
-    MASTERCLASS("Basics", Icons.AutoMirrored.Filled.MenuBook),
+    MASTERCLASS("Masterclass", Icons.AutoMirrored.Filled.MenuBook),
     ANALYTICS("Analysis", Icons.Default.InsertChart),
-    SIMULATION("Execution", Icons.Default.AutoGraph),
     MENTOR("AI Mentor", Icons.Default.SmartToy)
 }
 
@@ -239,8 +238,8 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                                     "home" -> selectedTab = 0
                                     "masterclass" -> selectedTab = 1
                                     "analytics" -> selectedTab = 2
-                                    "simulation" -> selectedTab = 3
-                                    "mentor" -> selectedTab = 4
+                                    "simulation" -> selectedTab = 1
+                                    "mentor" -> selectedTab = 3
                                     else -> selectedTab = 0
                                 }
                             }
@@ -317,7 +316,7 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                             MasterclassScreen(
                                 viewModel = viewModel,
                                 onNavigateToAiChatWithPrompt = { prompt ->
-                                    selectedTab = 4
+                                    selectedTab = 3
                                     viewModel.sendChatMessage(prompt)
                                 },
                                 onOpenCheckout = { showCheckoutModal = true }
@@ -382,18 +381,6 @@ fun MainAppScreen(viewModel: WealthViewModel) {
                             MarketRadarScreen(viewModel = viewModel)
                         }
                     }
-                }
-                NavigationTab.SIMULATION -> {
-                    // Stage 4: Simulated Execution
-                    SimulatedExecutionScreen(
-                        onConsultAiMentor = { prompt ->
-                            selectedTab = 4
-                            viewModel.sendChatMessage(prompt)
-                        },
-                        onCompleteStage4 = {
-                            viewModel.completeStage(4)
-                        }
-                    )
                 }
                 NavigationTab.MENTOR -> {
                     AiMentorScreen(viewModel = viewModel)

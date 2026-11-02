@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -122,18 +123,18 @@ val TRADER_ROADMAP_STAGES = listOf(
     ),
     RoadmapStage(
         stageNumber = 4,
-        title = "Simulated Execution & AI Mentor",
-        subtitle = "Paper Trading & AI Strategy",
-        description = "Deploy virtual ₹1,00,000 cash in simulated real-time equity execution with stop-loss orders and AI Mentor posture consultation.",
-        icon = Icons.Default.AutoGraph,
-        nextActionText = "Launch Trading Simulator",
+        title = "AI Mentor Strategy Desk",
+        subtitle = "Gemini AI Portfolio Advisory",
+        description = "Consult the Gemini AI Market Mentor on portfolio posture, candlestick patterns, risk-reward ratios, and live market regimes.",
+        icon = Icons.Default.SmartToy,
+        nextActionText = "Consult AI Market Mentor",
         stepChecklist = listOf(
-            "Practice placing Market & Limit buy/sell orders",
-            "Set protective Stop-Loss & Take-Profit exits",
-            "Consult Gemini AI Market Mentor on portfolio posture"
+            "Analyze chart setups and patterns with AI Mentor",
+            "Calculate asymmetric risk-to-reward ratios",
+            "Evaluate macro trends and institutional posture"
         ),
-        targetTab = "simulation",
-        tierLabel = "Execution Sandbox",
+        targetTab = "mentor",
+        tierLabel = "AI Intelligence Desk",
         isProTier = false
     )
 )

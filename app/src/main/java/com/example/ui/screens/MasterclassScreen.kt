@@ -85,6 +85,11 @@ import com.example.ui.theme.BrushedGold
 import com.example.ui.theme.CreamBackground
 import com.example.ui.theme.CreamBorder
 import com.example.ui.theme.CreamSurface
+import com.example.ui.theme.WarmBeigeBackground
+import com.example.ui.theme.WarmBeigeBorder
+import com.example.ui.theme.WarmBeigeCard
+import com.example.ui.theme.WarmBeigeContainer
+import com.example.ui.theme.WarmBeigeSurface
 import com.example.ui.theme.CrimsonLoss
 import com.example.ui.theme.EmeraldProfit
 import com.example.ui.theme.GoldGleam
@@ -144,8 +149,8 @@ fun MasterclassScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(Squircle16)
-                            .background(Color.White.copy(alpha = 0.9f))
-                            .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), Squircle16)
+                            .background(WarmBeigeCard.copy(alpha = 0.95f))
+                            .border(BorderStroke(1.dp, WarmBeigeBorder), Squircle16)
                             .padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -154,7 +159,7 @@ fun MasterclassScreen(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(Squircle12)
-                                .background(Color(0xFFF1F5F9))
+                                .background(WarmBeigeContainer)
                                 .appleSpringPress(onClick = { activeReadingChapter = null })
                                 .testTag("masterclass_back_button")
                         ) {
@@ -203,8 +208,8 @@ fun MasterclassScreen(
                     AppleGlassCard(
                         modifier = Modifier.fillMaxWidth(),
                         shape = Squircle28,
-                        backgroundColor = Color.White.copy(alpha = 0.95f),
-                        borderColor = Color(0xFFE2E8F0),
+                        backgroundColor = WarmBeigeCard.copy(alpha = 0.96f),
+                        borderColor = WarmBeigeBorder,
                         elevation = 6.dp
                     ) {
                         Column(modifier = Modifier.padding(22.dp)) {

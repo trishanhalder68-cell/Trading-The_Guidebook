@@ -52,6 +52,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Savings
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material3.Button
@@ -86,9 +87,15 @@ import com.example.data.model.TransactionType
 import com.example.ui.auth.CompactGoogleSignInChip
 import com.example.ui.components.AmbientLivingMeshBackground
 import com.example.ui.components.AppleGlassCard
+import com.example.ui.components.CURRICULUM_TREE_NODES
 import com.example.ui.components.LearningFlowchartTree
 import com.example.ui.components.TraderPathRoadmapSection
 import com.example.ui.components.appleSpringPress
+import com.example.ui.theme.WarmBeigeBackground
+import com.example.ui.theme.WarmBeigeBorder
+import com.example.ui.theme.WarmBeigeCard
+import com.example.ui.theme.WarmBeigeContainer
+import com.example.ui.theme.WarmBeigeSurface
 import com.example.ui.theme.BrushedGold
 import com.example.ui.theme.CreamBackground
 import com.example.ui.theme.CreamBorder
@@ -151,15 +158,21 @@ fun HomeScreen(
     // 0: Learning Tree & Badges (Default focus), 1: Capital Vault (Income Calculator)
     var homeTabState by remember { mutableIntStateOf(0) }
 
-    // Custom Focal Action Button: 0 = "Start Income", 1 = "Start Learning (Masterclass)"
-    var focalButtonMode by remember { mutableIntStateOf(0) }
-    var isAutoCycling by remember { mutableStateOf(true) }
+    // Dynamic next chapter or resume point in Masterclass
+    val nextLessonToComplete = CURRICULUM_TREE_NODES.firstOrNull { !completedLessons.contains(it.id) }
+    val lastLeftLesson = nextLessonToComplete ?: CURRICULUM_TREE_NODES.last()
+    val hasStartedAnyLesson = completedLessons.isNotEmpty()
 
-    // Calm 5-second alternating cycle between "Start Income" and "Start Learning" (saying "Masterclass")
-    LaunchedEffect(isAutoCycling) {
-        while (isAutoCycling) {
-            delay(5000L)
-            focalButtonMode = (focalButtonMode + 1) % 2
+    // Live Masterclass Action Button:
+    // Phase 0: "START LEARNING" (General Invitation / Pro Curriculum)
+    // Phase 1: Dynamic Chapter (In beginning: First comprehensive masterclass; Later: Chapter where user last left)
+    var liveMasterclassPhase by remember { mutableIntStateOf(0) }
+
+    // Live, breathing active cycle between "Start Learning" and the chapter where user last left
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(3800L)
+            liveMasterclassPhase = (liveMasterclassPhase + 1) % 2
         }
     }
 
@@ -206,8 +219,8 @@ fun HomeScreen(
                         Box(
                             modifier = Modifier
                                 .clip(Squircle12)
-                                .background(Color.White)
-                                .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), Squircle12)
+                                .background(WarmBeigeCard)
+                                .border(BorderStroke(1.dp, WarmBeigeBorder), Squircle12)
                                 .padding(horizontal = 9.dp, vertical = 5.dp)
                         ) {
                             Text(
@@ -265,8 +278,8 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(Squircle20)
-                        .background(Color.White.copy(alpha = 0.9f))
-                        .border(BorderStroke(1.dp, Color(0xFFE2E8F0)), Squircle20)
+                        .background(WarmBeigeCard.copy(alpha = 0.95f))
+                        .border(BorderStroke(1.dp, WarmBeigeBorder), Squircle20)
                         .padding(5.dp)
                 ) {
                     Row(modifier = Modifier.fillMaxWidth()) {
@@ -340,31 +353,18 @@ fun HomeScreen(
             // =========================================================================
             if (homeTabState == 0) {
                 // =====================================================================
-                // TAB 0: INTERACTIVE LEARNING FLOWCHART TREE & BADGES
-                // =====================================================================
-                item {
-                    LearningFlowchartTree(
-                        completedLessonIds = completedLessons,
-                        onCompleteLesson = { lessonId ->
-                            viewModel.completeLesson(lessonId)
-                        },
-                        onNavigateToMasterclassChapter = { chapterId ->
-                            onNavigateToStage("masterclass")
-                        },
-                        onOpenUpgradeModal = onOpenCheckout
-                    )
-                }
-
-                // =====================================================================
-                // HIGH-END FOCAL CUSTOM ACTION BUTTON
-                // Alternates smoothly between "Start Income" and "Start Learning" (Masterclass)
-                // Kept in sharp Apple-HIG focus with ambient halo, tactile springs, and focus lock
+                // START MASTERCLASS: HIGH-END LIVE DYNAMIC ACTION BUTTON
+                // Positioned prominently in the middle of the home page, directly above
+                // where the interactive learning tree begins.
+                // Live active button: alternates smoothly between "START LEARNING" and
+                // the chapter where the user last left (in beginning: Chapter 1).
+                // Warm minimalist beige styling with tactile spring feedback.
                 // =====================================================================
                 item {
                     val infiniteTransition = rememberInfiniteTransition(label = "focusPulse")
                     val pulseGlow by infiniteTransition.animateFloat(
-                        initialValue = 0.28f,
-                        targetValue = 0.75f,
+                        initialValue = 0.35f,
+                        targetValue = 0.85f,
                         animationSpec = infiniteRepeatable(
                             animation = tween(2200, easing = FastOutSlowInEasing),
                             repeatMode = RepeatMode.Reverse
@@ -377,13 +377,9 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .testTag("focal_action_panel"),
                         shape = Squircle28,
-                        backgroundColor = Color.White.copy(alpha = 0.96f),
-                        borderColor = if (focalButtonMode == 0) {
-                            GoldDark.copy(alpha = pulseGlow * 0.75f)
-                        } else {
-                            TrustBlue.copy(alpha = pulseGlow)
-                        },
-                        elevation = 8.dp
+                        backgroundColor = WarmBeigeCard.copy(alpha = 0.96f),
+                        borderColor = TrustBlue.copy(alpha = pulseGlow * 0.75f),
+                        elevation = 6.dp
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -391,7 +387,7 @@ fun HomeScreen(
                                 .fillMaxWidth()
                                 .padding(20.dp)
                         ) {
-                            // Header with living Focus Status & Mode Pill Switcher
+                            // Header: Live Indicator & Status Chip
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -402,74 +398,57 @@ fun HomeScreen(
                                         modifier = Modifier
                                             .size(8.dp)
                                             .clip(CircleShape)
-                                            .background(
-                                                if (focalButtonMode == 0) GoldDark else TrustBlue
-                                            )
+                                            .background(SageGreen)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "FOCUS ACTION",
+                                        text = "LIVE MASTERCLASS ENGINE",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (focalButtonMode == 0) GoldDark else TrustBlue,
+                                        color = TrustBlue,
                                         letterSpacing = 1.3.sp
                                     )
                                 }
 
-                                // Interactive Focus Chips: Tap to explicitly focus either mode
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                Box(
+                                    modifier = Modifier
+                                        .clip(Squircle12)
+                                        .background(WarmBeigeContainer)
+                                        .border(BorderStroke(1.dp, WarmBeigeBorder), Squircle12)
+                                        .padding(horizontal = 9.dp, vertical = 4.dp)
                                 ) {
-                                    // Focus Pill: Start Income
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(Squircle12)
-                                            .background(
-                                                if (focalButtonMode == 0) GoldGleam else Color(0xFFF1F5F9)
-                                            )
-                                            .clickable {
-                                                focalButtonMode = 0
-                                                isAutoCycling = false
-                                            }
-                                            .padding(horizontal = 9.dp, vertical = 4.dp)
-                                    ) {
-                                        Text(
-                                            text = "Start Income",
-                                            fontSize = 11.sp,
-                                            fontWeight = if (focalButtonMode == 0) FontWeight.Bold else FontWeight.Medium,
-                                            color = if (focalButtonMode == 0) ObsidianBlack else SlateMuted
-                                        )
-                                    }
-
-                                    // Focus Pill: Masterclass
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(Squircle12)
-                                            .background(
-                                                if (focalButtonMode == 1) TrustBlueContainer else Color(0xFFF1F5F9)
-                                            )
-                                            .clickable {
-                                                focalButtonMode = 1
-                                                isAutoCycling = false
-                                            }
-                                            .padding(horizontal = 9.dp, vertical = 4.dp)
-                                    ) {
-                                        Text(
-                                            text = "Masterclass",
-                                            fontSize = 11.sp,
-                                            fontWeight = if (focalButtonMode == 1) FontWeight.Bold else FontWeight.Medium,
-                                            color = if (focalButtonMode == 1) TrustBlue else SlateMuted
-                                        )
-                                    }
+                                    Text(
+                                        text = if (!hasStartedAnyLesson) "PILLAR 1: START HERE" else "RESUME CH ${lastLeftLesson.orderNumber}",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TrustBlue
+                                    )
                                 }
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            // Educational Value Proposition
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Text(
+                                    text = "The Sovereign Institutional Masterclass",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SlateCharcoal
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "6 Comprehensive Pillars • VOC 1602 roots to Smart Money Concepts & Liquidity Spreads. Master the complete system before committing capital.",
+                                    fontSize = 12.sp,
+                                    color = SlateMuted
+                                )
                             }
 
                             Spacer(modifier = Modifier.height(14.dp))
 
                             // =========================================================
-                            // THE CUSTOM BUTTON (Once says "Start Income", then says "Start Learning (Masterclass)")
-                            // Rendered as the prime hero focal element with rich continuous squircle geometry
+                            // THE LIVE BUTTON: Alternates between "START LEARNING" and
+                            // "CHAPTER WHERE USER LAST LEFT" (or Chapter 1 in beginning)
                             // =========================================================
                             Box(
                                 modifier = Modifier
@@ -477,60 +456,34 @@ fun HomeScreen(
                                     .shadow(
                                         elevation = 10.dp,
                                         shape = Squircle24,
-                                        spotColor = if (focalButtonMode == 0) {
-                                            GoldDark.copy(alpha = 0.4f)
-                                        } else {
-                                            TrustBlue.copy(alpha = 0.45f)
-                                        }
+                                        spotColor = TrustBlue.copy(alpha = 0.45f)
                                     )
                                     .clip(Squircle24)
                                     .background(
-                                        if (focalButtonMode == 0) {
-                                            Brush.horizontalGradient(
-                                                listOf(
-                                                    Color(0xFF0F172A),
-                                                    Color(0xFF1E293B),
-                                                    Color(0xFF0F172A)
-                                                )
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                TrustBlue,
+                                                TrustBlueHover,
+                                                Color(0xFF0369A1)
                                             )
-                                        } else {
-                                            Brush.horizontalGradient(
-                                                listOf(
-                                                    TrustBlue,
-                                                    TrustBlueHover,
-                                                    Color(0xFF0369A1)
-                                                )
-                                            )
-                                        }
+                                        )
                                     )
                                     .border(
-                                        BorderStroke(
-                                            1.5.dp,
-                                            if (focalButtonMode == 0) {
-                                                GoldGleam.copy(alpha = 0.85f)
-                                            } else {
-                                                Color.White.copy(alpha = 0.45f)
-                                            }
-                                        ),
+                                        BorderStroke(1.5.dp, Color.White.copy(alpha = 0.45f)),
                                         Squircle24
                                     )
                                     .appleSpringPress(
                                         onClick = {
-                                            if (focalButtonMode == 0) {
-                                                onOpenAddTransaction()
-                                            } else {
-                                                onNavigateToStage("masterclass")
-                                            }
+                                            viewModel.selectRoadmapStage(2)
+                                            onNavigateToStage("masterclass")
                                         }
                                     )
-                                    .testTag(
-                                        if (focalButtonMode == 0) "start_income_button" else "start_masterclass_button"
-                                    )
+                                    .testTag("start_masterclass_button")
                                     .padding(vertical = 18.dp, horizontal = 20.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 AnimatedContent(
-                                    targetState = focalButtonMode,
+                                    targetState = liveMasterclassPhase,
                                     transitionSpec = {
                                         (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) +
                                             slideInVertically(
@@ -543,80 +496,10 @@ fun HomeScreen(
                                                     targetOffsetY = { -it / 2 }
                                                 ))
                                     },
-                                    label = "customFocalButtonContent"
-                                ) { mode ->
-                                    if (mode == 0) {
-                                        // STATE A: "START INCOME"
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.weight(1f)
-                                            ) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(46.dp)
-                                                        .clip(Squircle16)
-                                                        .background(GoldDark.copy(alpha = 0.25f))
-                                                        .border(BorderStroke(1.dp, GoldGleam.copy(alpha = 0.5f)), Squircle16),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.AccountBalanceWallet,
-                                                        contentDescription = null,
-                                                        tint = GoldGleam,
-                                                        modifier = Modifier.size(24.dp)
-                                                    )
-                                                }
-
-                                                Spacer(modifier = Modifier.width(14.dp))
-
-                                                Column {
-                                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                                        Text(
-                                                            text = "START INCOME",
-                                                            fontSize = 17.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = Color.White,
-                                                            letterSpacing = 0.8.sp
-                                                        )
-                                                        Spacer(modifier = Modifier.width(6.dp))
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .clip(Squircle12)
-                                                                .background(GoldGleam)
-                                                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                                                        ) {
-                                                            Text(
-                                                                text = "CASHFLOW",
-                                                                fontSize = 9.sp,
-                                                                fontWeight = FontWeight.Black,
-                                                                color = ObsidianBlack
-                                                            )
-                                                        }
-                                                    }
-                                                    Spacer(modifier = Modifier.height(2.dp))
-                                                    Text(
-                                                        text = "Log deposits, compound savings & seed trading capital",
-                                                        fontSize = 11.sp,
-                                                        color = Color(0xFFCBD5E1),
-                                                        maxLines = 1
-                                                    )
-                                                }
-                                            }
-
-                                            Icon(
-                                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                                contentDescription = null,
-                                                tint = GoldGleam,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                    } else {
-                                        // STATE B: "START LEARNING" (saying "Masterclass")
+                                    label = "liveMasterclassButtonContent"
+                                ) { phase ->
+                                    if (phase == 0) {
+                                        // STATE A: "START LEARNING"
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -670,7 +553,7 @@ fun HomeScreen(
                                                     }
                                                     Spacer(modifier = Modifier.height(2.dp))
                                                     Text(
-                                                        text = "Masterclass • 6 Pillars • Candlesticks & Liquidity",
+                                                        text = "Comprehensive 6 Pillars • Candlesticks & Liquidity",
                                                         fontSize = 11.sp,
                                                         color = Color.White.copy(alpha = 0.88f),
                                                         maxLines = 1
@@ -685,23 +568,102 @@ fun HomeScreen(
                                                 modifier = Modifier.size(20.dp)
                                             )
                                         }
+                                    } else {
+                                        // STATE B: Dynamic Chapter (Beginning: Chapter 1; Later: Chapter where user last left)
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(46.dp)
+                                                        .clip(Squircle16)
+                                                        .background(GoldDark.copy(alpha = 0.3f))
+                                                        .border(BorderStroke(1.dp, GoldGleam.copy(alpha = 0.6f)), Squircle16),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.School,
+                                                        contentDescription = null,
+                                                        tint = GoldGleam,
+                                                        modifier = Modifier.size(24.dp)
+                                                    )
+                                                }
+
+                                                Spacer(modifier = Modifier.width(14.dp))
+
+                                                Column {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text(
+                                                            text = if (!hasStartedAnyLesson) {
+                                                                "CHAPTER 1: VOC GENESIS"
+                                                            } else {
+                                                                "RESUME CH ${lastLeftLesson.orderNumber}: ${lastLeftLesson.title.take(18)}..."
+                                                            },
+                                                            fontSize = 15.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = Color.White,
+                                                            letterSpacing = 0.6.sp
+                                                        )
+                                                        Spacer(modifier = Modifier.width(6.dp))
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .clip(Squircle12)
+                                                                .background(GoldGleam)
+                                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                        ) {
+                                                            Text(
+                                                                text = if (!hasStartedAnyLesson) "FIRST MASTERCLASS" else "WHERE YOU LEFT",
+                                                                fontSize = 9.sp,
+                                                                fontWeight = FontWeight.Black,
+                                                                color = ObsidianBlack
+                                                            )
+                                                        }
+                                                    }
+                                                    Spacer(modifier = Modifier.height(2.dp))
+                                                    Text(
+                                                        text = if (!hasStartedAnyLesson) {
+                                                            "Double Auction & 1602 Roots • Tap to Start"
+                                                        } else {
+                                                            "${lastLeftLesson.conceptHeadline.take(40)}... • Tap to Continue"
+                                                        },
+                                                        fontSize = 11.sp,
+                                                        color = Color.White.copy(alpha = 0.90f),
+                                                        maxLines = 1
+                                                    )
+                                                }
+                                            }
+
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                                contentDescription = null,
+                                                tint = GoldGleam,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            // Focus Status & Cycling Indicator Dots
+                            // Live Status & Cycling Indicator Dots
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = if (isAutoCycling) {
-                                        if (focalButtonMode == 0) "• In Focus: Capital Generation Desk" else "• In Focus: Institutional Masterclass"
+                                    text = if (liveMasterclassPhase == 0) {
+                                        "• Live Desk: Active • Alternating with curriculum syllabus"
                                     } else {
-                                        if (focalButtonMode == 0) "• Focused on Income Logging (Manual)" else "• Focused on Masterclass (Manual)"
+                                        if (!hasStartedAnyLesson) "• Comprehensive Pillar 1: 100% Free Foundation Course"
+                                        else "• Resume Point: Chapter ${lastLeftLesson.orderNumber} (${lastLeftLesson.levelTier})"
                                     },
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Medium,
@@ -714,24 +676,41 @@ fun HomeScreen(
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .size(width = if (focalButtonMode == 0) 18.dp else 6.dp, height = 6.dp)
+                                            .size(width = if (liveMasterclassPhase == 0) 18.dp else 6.dp, height = 6.dp)
                                             .clip(CircleShape)
                                             .background(
-                                                if (focalButtonMode == 0) GoldDark else Color(0xFFCBD5E1)
+                                                if (liveMasterclassPhase == 0) TrustBlue else Color(0xFFCBD5E1)
                                             )
                                     )
                                     Box(
                                         modifier = Modifier
-                                            .size(width = if (focalButtonMode == 1) 18.dp else 6.dp, height = 6.dp)
+                                            .size(width = if (liveMasterclassPhase == 1) 18.dp else 6.dp, height = 6.dp)
                                             .clip(CircleShape)
                                             .background(
-                                                if (focalButtonMode == 1) TrustBlue else Color(0xFFCBD5E1)
+                                                if (liveMasterclassPhase == 1) GoldDark else Color(0xFFCBD5E1)
                                             )
                                     )
                                 }
                             }
                         }
                     }
+                }
+
+                // =====================================================================
+                // TAB 0: INTERACTIVE LEARNING FLOWCHART TREE & BADGES
+                // (Starts right here, immediately below Start Masterclass)
+                // =====================================================================
+                item {
+                    LearningFlowchartTree(
+                        completedLessonIds = completedLessons,
+                        onCompleteLesson = { lessonId ->
+                            viewModel.completeLesson(lessonId)
+                        },
+                        onNavigateToMasterclassChapter = { chapterId ->
+                            onNavigateToStage("masterclass")
+                        },
+                        onOpenUpgradeModal = onOpenCheckout
+                    )
                 }
 
                 // 4-Stage Sequential Roadmap Section
@@ -749,7 +728,7 @@ fun HomeScreen(
                                 1 -> "home"
                                 2 -> "masterclass"
                                 3 -> "analytics"
-                                4 -> "simulation"
+                                4 -> "mentor"
                                 else -> "home"
                             }
                             onNavigateToStage(target)
@@ -766,8 +745,8 @@ fun HomeScreen(
                     AppleGlassCard(
                         modifier = Modifier.fillMaxWidth(),
                         shape = Squircle28,
-                        backgroundColor = Color.White.copy(alpha = 0.95f),
-                        borderColor = Color(0xFFE2E8F0),
+                        backgroundColor = WarmBeigeCard.copy(alpha = 0.96f),
+                        borderColor = WarmBeigeBorder,
                         elevation = 6.dp
                     ) {
                         Column(modifier = Modifier.padding(22.dp)) {
@@ -944,8 +923,8 @@ fun HomeScreen(
                         AppleGlassCard(
                             modifier = Modifier.fillMaxWidth(),
                             shape = Squircle20,
-                            backgroundColor = Color.White.copy(alpha = 0.9f),
-                            borderColor = Color(0xFFE2E8F0),
+                            backgroundColor = WarmBeigeCard.copy(alpha = 0.95f),
+                            borderColor = WarmBeigeBorder,
                             elevation = 2.dp
                         ) {
                             Column(
@@ -978,8 +957,8 @@ fun HomeScreen(
                         AppleGlassCard(
                             modifier = Modifier.fillMaxWidth(),
                             shape = Squircle16,
-                            backgroundColor = Color.White.copy(alpha = 0.92f),
-                            borderColor = Color(0xFFE2E8F0),
+                            backgroundColor = WarmBeigeCard.copy(alpha = 0.96f),
+                            borderColor = WarmBeigeBorder,
                             elevation = 1.dp
                         ) {
                             Row(

@@ -3,13 +3,20 @@ package com.example.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // =====================================================================
-// Modern Minimalist Human-Friendly Finance Palette
-// Warm Off-White / Soft Cream Background & Deep Slate Charcoal
+// Modern Minimalist Warm Beige Palette (Warm Cashmere / Linen Minimalist Hue)
+// Replaces stark white with a calming, luxurious warm beige aesthetic
 // =====================================================================
-val CreamBackground = Color(0xFFF7F6F2)
-val CreamSurface = Color(0xFFFFFFFF)
-val CreamContainer = Color(0xFFEFECE6)
-val CreamBorder = Color(0xFFE2DFD7)
+val WarmBeigeBackground = Color(0xFFF5F1E8)   // Minimalist warm cashmere beige
+val WarmBeigeSurface = Color(0xFFFAF7F0)      // Soft warm ivory / eggshell surface
+val WarmBeigeCard = Color(0xFFFAF7F0)         // Warm card container
+val WarmBeigeContainer = Color(0xFFEFE8DB)    // Muted warm beige pill/container
+val WarmBeigeBorder = Color(0xFFE2DACB)       // Organic warm border
+val WarmBeigeBorderSubtle = Color(0xFFECE5D8)
+
+val CreamBackground = WarmBeigeBackground
+val CreamSurface = WarmBeigeSurface
+val CreamContainer = WarmBeigeContainer
+val CreamBorder = WarmBeigeBorder
 
 // Deep Slate Charcoal for High Readability
 val SlateCharcoal = Color(0xFF0F172A)
